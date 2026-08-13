@@ -1,0 +1,82 @@
+@import 'tailwindcss';
+
+/*
+  Dark-first by design. Beyond looking right for a high-desert trip, an OLED
+  phone burns less battery on a dark UI -- and there is no electricity in the
+  huts between Telluride and the Gateway store on day 5.
+*/
+@theme {
+  --color-ink-950: #080b14;
+  --color-ink-900: #0f172a;
+  --color-ink-850: #141c31;
+  --color-ink-800: #1c2740;
+  --color-ink-700: #2b3a5a;
+  --color-ink-600: #435a7a;
+
+  /* Moab red rock */
+  --color-rock-400: #f0876a;
+  --color-rock-500: #e2603c;
+  --color-rock-600: #c2410c;
+
+  /* Aspen gold, late September */
+  --color-aspen-300: #fcd34d;
+  --color-aspen-400: #fbbf24;
+  --color-aspen-500: #f59e0b;
+
+  /* Alpine sage */
+  --color-sage-400: #6ee7b7;
+  --color-sage-500: #10b981;
+
+  --font-display: 'Bebas Neue', 'Oswald', system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+  --sjh-bg: var(--color-ink-950);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--sjh-bg);
+  color: #e2e8f0;
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* Topographic texture for page headers -- subtle, never load-bearing. */
+.topo {
+  background-image:
+    radial-gradient(
+      circle at 20% 30%,
+      color-mix(in srgb, var(--color-rock-500) 18%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      color-mix(in srgb, var(--color-aspen-500) 12%, transparent) 0%,
+      transparent 40%
+    );
+}
+
+/* Steppers and claim targets need to be thumb-sized -- these get tapped with
+   cold hands, sometimes in gloves. */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
