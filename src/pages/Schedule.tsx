@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { DAYS, TOTALS, TRIP, type TripDay } from "../data/trip";
+import { useSnapshot } from "../lib/useStore";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -30,6 +31,10 @@ function Stat({
 }
 
 function DayCard({ d }: { d: TripDay }) {
+  const snap = useSnapshot();
+  const open = snap.decisions.filter(
+    (x) => x.scope === "day" && x.scope_id === d.id && x.status === "open",
+  ).length;
   const isTravel = d.kind === "travel";
   // Day 6 is the outlier: least mileage, most climbing of the week.
   const brutal = (d.gainFt ?? 0) >= 4000;
@@ -95,17 +100,24 @@ function DayCard({ d }: { d: TripDay }) {
         )}
       </div>
 
-      {d.flags.length > 0 && (
-        <div className="border-t border-ink-800/70 bg-ink-950/40 px-4 py-2.5">
-          <span className="text-[11px] leading-snug text-rock-400">
-            ⚑ {d.flags[0]}
-            {d.flags.length > 1 && (
-              <span className="text-slate-600">
-                {" "}
-                +{d.flags.length - 1} more
-              </span>
-            )}
-          </span>
+      {(d.flags.length > 0 || open > 0) && (
+        <div className="space-y-1 border-t border-ink-800/70 bg-ink-950/40 px-4 py-2.5">
+          {d.flags.length > 0 && (
+            <span className="block text-[11px] leading-snug text-rock-400">
+              ⚑ {d.flags[0]}
+              {d.flags.length > 1 && (
+                <span className="text-slate-600">
+                  {" "}
+                  +{d.flags.length - 1} more
+                </span>
+              )}
+            </span>
+          )}
+          {open > 0 && (
+            <span className="block text-[11px] leading-snug text-aspen-400">
+              ● {open} decision{open === 1 ? "" : "s"} open
+            </span>
+          )}
         </div>
       )}
     </Link>

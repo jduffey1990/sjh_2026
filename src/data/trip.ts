@@ -33,7 +33,11 @@ export interface TripDay {
   detail: string[];
   /** Singletrack alternates and route options. */
   alternates: string[];
-  /** Things that need a group decision or advance booking. */
+  /**
+   * Fixed hazards and heads-ups only -- things that are true regardless of
+   * what anyone decides. Anything requiring a group call lives in the
+   * `decisions` table instead, so it can actually be settled.
+   */
   flags: string[];
   /** SJH elevation profile graphic, if one exists for this day. */
   profile: string | null;
@@ -84,11 +88,7 @@ export const DAYS: TripDay[] = [
       "Last chance for anything forgotten: Ridgway and Montrose have proper grocery and hardware. After Telluride there is nothing until the Gateway store on day 5.",
     ],
     alternates: [],
-    flags: [
-      "Lodging in Ridgway needs booking.",
-      "Confirm carpools and who is hauling whose bike.",
-      "Decide where vehicles live for the week — see the Travel page.",
-    ],
+    flags: [],
     profile: null,
   },
   {
@@ -118,7 +118,6 @@ export const DAYS: TripDay[] = [
     ],
     flags: [
       "Altitude: 10,995 ft with no acclimatisation. Hydrate hard, start slow.",
-      "Decide as a group whether to take the gondola.",
     ],
     profile: "TM-Day-1-Graph.webp",
   },
@@ -168,9 +167,7 @@ export const DAYS: TripDay[] = [
     alternates: [
       "Beginner through advanced singletrack alternates along the plateau edge.",
     ],
-    flags: [
-      "Longest day of the trip — agree on a departure time the night before.",
-    ],
+    flags: [],
     profile: "TM-DAY-3-Graph.webp",
   },
   {
@@ -220,7 +217,6 @@ export const DAYS: TripDay[] = [
     alternates: ["Ute Creek Trail — the pick of the singletrack on this day."],
     flags: [
       "Only charging stop of the week — top up every battery, light and GPS.",
-      "Sort the day 6 shuttle here if the group wants it.",
     ],
     profile: "TM-DAY-5-Graph.webp",
   },
@@ -248,7 +244,6 @@ export const DAYS: TripDay[] = [
       "Shuttle the John Brown Canyon climb from Gateway General Store — reduces the day to about 7.5 miles of riding.",
     ],
     flags: [
-      "GROUP DECISION: shuttle the climb or ride it. Arrange at Gateway on day 5.",
       "4,500 ft of climbing in 21 miles if ridden — the hardest day of the week.",
     ],
     profile: "TM-DAY-6-Graph.webp",
@@ -276,7 +271,7 @@ export const DAYS: TripDay[] = [
     alternates: [
       "Porcupine Rim Trail — legendary, technical, and a big ask on day 7.",
     ],
-    flags: ["Sort the ride back to Telluride / vehicles before this day."],
+    flags: [],
     profile: "TM-DAY-7-Graph.webp",
   },
 ];

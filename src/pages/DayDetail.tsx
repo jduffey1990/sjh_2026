@@ -1,5 +1,8 @@
 import { Link, useParams } from "react-router-dom";
 import { DAYS } from "../data/trip";
+import Decisions from "../components/Decisions";
+import Comments from "../components/Comments";
+import { hasBackend } from "../lib/supabase";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -129,7 +132,7 @@ export default function DayDetail() {
       {d.flags.length > 0 && (
         <section className="mt-8">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-rock-400">
-            Needs attention
+            Heads up
           </h2>
           <ul className="mt-3 space-y-2">
             {d.flags.map((f, i) => (
@@ -143,6 +146,25 @@ export default function DayDetail() {
             ))}
           </ul>
         </section>
+      )}
+
+      {hasBackend && (
+        <>
+          <div className="mt-8">
+            <Decisions scope="day" scopeId={d.id} />
+          </div>
+
+          <section className="mt-8">
+            <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              Notes on this day
+            </h2>
+            <Comments
+              scope="day"
+              scopeId={d.id}
+              placeholder="Anything the group should know…"
+            />
+          </section>
+        </>
       )}
 
       <nav className="mt-10 flex gap-3 border-t border-ink-800 pt-5 text-sm">

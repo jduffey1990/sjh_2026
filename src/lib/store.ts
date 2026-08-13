@@ -9,6 +9,10 @@ import {
   type Claim,
   type PersonalItem,
   type DbRider,
+  type Decision,
+  type Comment,
+  type LogisticsField,
+  type Scope,
 } from "./types";
 
 const CACHE_KEY = "sjh2026.snapshot";
@@ -32,6 +36,9 @@ const CONFLICT_TARGET: Record<Table, string> = {
   group_items: "id",
   claims: "group_item_id,rider_id",
   personal_items: "id",
+  decisions: "id",
+  comments: "id",
+  logistics_fields: "id",
 };
 
 const TABLE_TO_FIELD: Record<Table, keyof Snapshot> = {
@@ -39,6 +46,9 @@ const TABLE_TO_FIELD: Record<Table, keyof Snapshot> = {
   group_items: "groupItems",
   claims: "claims",
   personal_items: "personalItems",
+  decisions: "decisions",
+  comments: "comments",
+  logistics_fields: "logisticsFields",
 };
 
 /**
@@ -126,14 +136,31 @@ class Store {
       return;
     }
     try {
-      const [riders, groupItems, claims, personalItems] = await Promise.all([
+      const [
+        riders,
+        groupItems,
+        claims,
+        personalItems,
+        decisions,
+        comments,
+        logisticsFields,
+      ] = await Promise.all([
         supabase.from("riders").select("*").order("sort_order"),
         supabase.from("group_items").select("*").order("name"),
         supabase.from("claims").select("*"),
         supabase.from("personal_items").select("*").order("sort_order"),
+        supabase.from("decisions").select("*").order("sort_order"),
+        supabase.from("comments").select("*").order("created_at"),
+        supabase.from("logistics_fields").select("*").order("sort_order"),
       ]);
       const err =
-        riders.error || groupItems.error || claims.error || personalItems.error;
+        riders.error ||
+        groupItems.error ||
+        claims.error ||
+        personalItems.error ||
+        decisions.error ||
+        comments.error ||
+        logisticsFields.error;
       if (err) throw err;
 
       this.setSnap({
@@ -141,6 +168,9 @@ class Store {
         groupItems: (groupItems.data ?? []) as GroupItem[],
         claims: (claims.data ?? []) as Claim[],
         personalItems: (personalItems.data ?? []) as PersonalItem[],
+        decisions: (decisions.data ?? []) as Decision[],
+        comments: (comments.data ?? []) as Comment[],
+        logisticsFields: (logisticsFields.data ?? []) as LogisticsField[],
       });
       this.setStatus("ready");
     } catch {
@@ -354,6 +384,110 @@ class Store {
 
   deletePersonal(id: string) {
     this.remove("personal_items", id);
+  }
+
+  // ---- decisions ----------------------------------------------------
+
+  /**
+   * Resolving records the outcome, not just a status flag -- "we decided" is
+   * useless three weeks later without "we decided what".
+   */
+  resolveDecision(id: string, outcome: string, by: string | null) {
+    const d = this.snap.decisions.find((x) => x.id === id);
+    if (!d) return;
+    this.write<"decisions">("decisions", {
+      ...d,
+      status: "resolved",
+      outcome,
+      resolved_by: by,
+      resolved_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  reopenDecision(id: string) {
+    const d = this.snap.decisions.find((x) => x.id === id);
+    if (!d) return;
+    this.write<"decisions">("decisions", {
+      ...d,
+      status: "open",
+      outcome: null,
+      resolved_by: null,
+      resolved_at: null,
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  updateDecision(id: string, patch: Partial<Decision>) {
+    const d = this.snap.decisions.find((x) => x.id === id);
+    if (!d) return;
+    this.write<"decisions">("decisions", {
+      ...d,
+      ...patch,
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  addDecision(
+    scope: "day" | "logistics",
+    scopeId: string,
+    title: string,
+    detail?: string,
+  ) {
+    const now = new Date().toISOString();
+    this.write<"decisions">("decisions", {
+      id: crypto.randomUUID(),
+      scope,
+      scope_id: scopeId,
+      title,
+      detail: detail ?? null,
+      status: "open",
+      outcome: null,
+      resolved_by: null,
+      resolved_at: null,
+      sort_order: 100,
+      created_at: now,
+      updated_at: now,
+    });
+  }
+
+  deleteDecision(id: string) {
+    this.remove("decisions", id);
+  }
+
+  // ---- comments -----------------------------------------------------
+  addComment(
+    scope: Scope,
+    scopeId: string,
+    riderId: string | null,
+    body: string,
+  ) {
+    const now = new Date().toISOString();
+    this.write<"comments">("comments", {
+      id: crypto.randomUUID(),
+      scope,
+      scope_id: scopeId,
+      rider_id: riderId,
+      body,
+      created_at: now,
+      updated_at: now,
+    });
+  }
+
+  deleteComment(id: string) {
+    this.remove("comments", id);
+  }
+
+  // ---- logistics ----------------------------------------------------
+  setLogisticsField(id: string, value: string, by: string | null) {
+    const f = this.snap.logisticsFields.find((x) => x.id === id);
+    if (!f) return;
+    this.write<"logisticsFields">("logistics_fields", {
+      ...f,
+      value,
+      updated_by: by,
+      updated_at: new Date().toISOString(),
+    });
   }
 
   // ---- riders -------------------------------------------------------

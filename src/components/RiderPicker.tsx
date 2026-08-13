@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useRider } from "../lib/useRider";
+import { hasBackend, signOut } from "../lib/supabase";
 
 export function Avatar({
   initials,
@@ -110,7 +111,19 @@ export default function RiderPicker() {
               }}
               className="w-full border-t border-ink-800 px-3 py-2 text-left text-xs text-slate-500 hover:bg-ink-800 hover:text-slate-300"
             >
-              Sign out of this device
+              Forget who I am on this device
+            </button>
+          )}
+          {hasBackend && (
+            <button
+              onClick={() => {
+                setOpen(false);
+                void signOut();
+              }}
+              className="w-full border-t border-ink-800 px-3 py-2 text-left text-xs text-slate-600 hover:bg-ink-800 hover:text-rock-400"
+              title="You will need the trip password to get back in"
+            >
+              Lock the site
             </button>
           )}
         </div>

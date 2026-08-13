@@ -51,11 +51,52 @@ export interface PersonalItem {
   updated_at: string;
 }
 
+/** What a decision or comment hangs off: a day card, or a Travel section. */
+export type Scope = "day" | "logistics" | "decision";
+
+export interface Decision {
+  id: string;
+  scope: "day" | "logistics";
+  scope_id: string;
+  title: string;
+  detail: string | null;
+  status: "open" | "resolved";
+  outcome: string | null;
+  resolved_by: string | null;
+  resolved_at: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Comment {
+  id: string;
+  scope: Scope;
+  scope_id: string;
+  rider_id: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LogisticsField {
+  id: string;
+  section_id: string;
+  label: string;
+  value: string | null;
+  sort_order: number;
+  updated_by: string | null;
+  updated_at: string;
+}
+
 export interface Snapshot {
   riders: DbRider[];
   groupItems: GroupItem[];
   claims: Claim[];
   personalItems: PersonalItem[];
+  decisions: Decision[];
+  comments: Comment[];
+  logisticsFields: LogisticsField[];
 }
 
 export const EMPTY: Snapshot = {
@@ -63,6 +104,9 @@ export const EMPTY: Snapshot = {
   groupItems: [],
   claims: [],
   personalItems: [],
+  decisions: [],
+  comments: [],
+  logisticsFields: [],
 };
 
 export type SyncStatus =
@@ -71,7 +115,14 @@ export type SyncStatus =
 /** A queued mutation, replayed in order once we are back on the network. */
 export interface OutboxEntry {
   id: string;
-  table: "riders" | "group_items" | "claims" | "personal_items";
+  table:
+    | "riders"
+    | "group_items"
+    | "claims"
+    | "personal_items"
+    | "decisions"
+    | "comments"
+    | "logistics_fields";
   op: "upsert" | "delete";
   payload: Record<string, unknown>;
   ts: number;

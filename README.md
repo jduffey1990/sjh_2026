@@ -61,15 +61,54 @@ npm run dev                  # http://localhost:5173/sjh_2026/
 ### Supabase
 
 1. Create a project at [supabase.com](https://supabase.com) (free tier is plenty).
-2. SQL Editor → run [`supabase/schema.sql`](supabase/schema.sql), then
-   [`supabase/seed.sql`](supabase/seed.sql).
-3. Project Settings → API → copy the URL and **anon** key into `.env.local`.
+2. Run the migrations **in order**:
 
-⚠️ **The anon key is public.** It ships inside a static bundle on a public repo,
-and the RLS policies allow anyone with the URL to read and write the board.
-That's a deliberate trade for a no-passwords trip site among friends. Keep phone
-numbers, addresses and emergency contacts out of the database — the Riders page
-holds bike specs only, on purpose.
+   ```bash
+   psql "$DB_URI" -f supabase/schema.sql
+   psql "$DB_URI" -f supabase/seed.sql
+   psql "$DB_URI" -f supabase/002_planning.sql
+   psql "$DB_URI" -v pw="'your-trip-password'" -f supabase/003_auth.sql
+   ```
+
+3. Project Settings → API → copy the URL and **anon** key into `.env.local` as
+   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. (Vite only reads `VITE_`
+   prefixed variables — `NEXT_PUBLIC_*` names are silently ignored.)
+
+## Access
+
+The site is gated by a single shared password. It is a **real** gate, not a UI
+one, and that distinction matters: the bundle is static and public, so the
+Supabase key inside it can be read by anyone. A JavaScript password prompt would
+be trivially bypassed by calling the REST API directly.
+
+So instead, `003_auth.sql` creates one shared account and rewrites every RLS
+policy to require the `authenticated` role. Without a session the anon key
+returns `[]` from every table. The gate is enforced by Postgres.
+
+Sign-in persists and auto-refreshes, so you do it once. **Do it before you
+leave** — there's no signal to sign in with between Telluride and Gateway.
+
+To rotate the password, re-run `003_auth.sql` with a new `-v pw`. The password
+is never committed to this repo; it's passed in at run time.
+
+⚠️ Still don't put anything sensitive in the database. One shared password among
+eight people is not access control in any serious sense — the Riders page holds
+bike specs and deliberately no phone numbers or emergency contacts.
+
+## Planning vs. route facts
+
+Route facts — mileage, elevation, hut names, terrain, singletrack alternates —
+are hard-coded in [`src/data/trip.ts`](src/data/trip.ts). They don't change, and
+keeping them static means the schedule renders offline with no round-trip.
+
+Everything *around* them is live:
+
+- **Decisions** — open questions attached to a day or a Travel section. Resolving
+  one records the outcome and who settled it, not just a status flag. Open counts
+  surface on the schedule cards.
+- **Comments** — threads on any day, Travel section, or individual decision.
+- **Logistics fields** — the label/value pairs on the Travel page are editable in
+  place, so whoever books the lodge types it in and everyone has it.
 
 ### Deploying
 

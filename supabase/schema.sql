@@ -117,14 +117,14 @@ create trigger t_riders_touch before update on riders
 -- ---------------------------------------------------------------------
 -- RLS.
 --
--- READ THIS BEFORE DEPLOYING: the anon key ships inside a static bundle
--- on a public GitHub Pages site, so these policies mean anyone with the
--- URL can read and write the packing board. That is a deliberate choice
--- for a private trip site among eight friends who wanted no passwords.
+-- NOTE: these open policies are SUPERSEDED by 003_auth.sql, which drops
+-- them and requires the `authenticated` role instead. Run the migrations
+-- in order (schema -> seed -> 002 -> 003) and the site ends up gated
+-- behind the shared trip password, with the anon key returning nothing.
 --
--- The practical consequence: do NOT put anything sensitive in these
--- tables. Bike specs are fine. Phone numbers, addresses and emergency
--- contacts are not -- keep those in your group chat.
+-- Either way, do NOT put anything sensitive in these tables. Bike specs
+-- are fine. Phone numbers, addresses and emergency contacts are not --
+-- keep those in your group chat.
 -- ---------------------------------------------------------------------
 alter table riders         enable row level security;
 alter table group_items    enable row level security;
