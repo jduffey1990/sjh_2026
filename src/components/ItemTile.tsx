@@ -17,7 +17,7 @@ const STATE_LABEL: Record<string, string> = {
   needed: "Nobody bringing",
   partial: "Short",
   claimed: "Covered",
-  packed: "Packed",
+  packed: "Covered · all packed",
   "not-required": "Not required",
 };
 
@@ -171,29 +171,27 @@ export default function ItemTile({
         </div>
       )}
 
-      {/* --- quick claim ----------------------------------------------- */}
+      {/* --- quick claim -------------------------------------------------
+          Claiming is a commitment, not a packing action. Ticking something as
+          physically in a bag happens on My Kit, where you are standing over
+          the bag -- keeping both on this tile made them feel like one step. */}
       {!open && me && (
         <div className="flex items-center gap-2 p-3 pt-2.5">
           {mine ? (
             <>
+              <span className="flex-1 truncate text-[12px] text-slate-400">
+                You're bringing {mine.qty}
+                {mine.packed ? (
+                  <span className="text-sage-400"> · packed ✓</span>
+                ) : (
+                  <span className="text-slate-600"> · not packed yet</span>
+                )}
+              </span>
               <button
-                onClick={() => store.setClaim(item.id, me.id, mine.qty - 1)}
-                className="tap-target rounded-lg border border-ink-700 px-3 text-sm text-slate-400 hover:text-slate-100"
+                onClick={() => store.setClaim(item.id, me.id, 0)}
+                className="tap-target shrink-0 rounded-lg border border-ink-700 px-3 text-sm text-slate-400 hover:border-rock-600/60 hover:text-rock-400"
               >
                 Drop
-              </button>
-              <button
-                onClick={() => store.togglePacked(item.id, me.id)}
-                className={[
-                  "tap-target flex-1 rounded-lg border px-3 text-sm font-medium",
-                  mine.packed
-                    ? "border-sage-500/50 bg-sage-500/15 text-sage-400"
-                    : "border-ink-700 text-slate-300 hover:border-ink-600",
-                ].join(" ")}
-              >
-                {mine.packed
-                  ? `✓ Packed (${mine.qty})`
-                  : `In my bag (${mine.qty})`}
               </button>
             </>
           ) : (

@@ -80,6 +80,10 @@ export default function Board() {
     (n, t) => n + Math.min(t.claimed, t.item.qty),
     0,
   );
+  // Claimed is a promise; packed is a bag. Before leaving, the gap between the
+  // two is the number worth staring at.
+  const claimCount = snap.claims.length;
+  const packedCount = snap.claims.filter((c) => c.packed).length;
 
   return (
     <DndContext sensors={sensors} onDragEnd={onDragEnd}>
@@ -91,17 +95,39 @@ export default function Board() {
                 Packing board
               </h1>
               <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-400">
-                Group gear only. Claim what you're carrying; drop a count to
-                zero and it moves to Not Required.
+                Group gear only. Claim what you're carrying here; tick it off as
+                physically packed over on{" "}
+                <Link to="/kit" className="text-aspen-500 underline">
+                  My kit
+                </Link>
+                . Drop a count to zero and it moves to Not Required.
               </p>
             </div>
-            <div className="ml-auto text-right">
-              <div className="text-2xl font-bold tabular-nums text-slate-100">
-                {totalClaimed}
-                <span className="text-slate-600">/{totalNeeded}</span>
+            <div className="ml-auto flex gap-6 text-right">
+              <div>
+                <div className="text-2xl font-bold tabular-nums text-slate-100">
+                  {totalClaimed}
+                  <span className="text-slate-600">/{totalNeeded}</span>
+                </div>
+                <div className="text-[10px] uppercase tracking-wider text-slate-500">
+                  claimed
+                </div>
               </div>
-              <div className="text-[10px] uppercase tracking-wider text-slate-500">
-                items covered
+              <div>
+                <div
+                  className={[
+                    "text-2xl font-bold tabular-nums",
+                    claimCount > 0 && packedCount === claimCount
+                      ? "text-sage-400"
+                      : "text-slate-100",
+                  ].join(" ")}
+                >
+                  {packedCount}
+                  <span className="text-slate-600">/{claimCount}</span>
+                </div>
+                <div className="text-[10px] uppercase tracking-wider text-slate-500">
+                  in a bag
+                </div>
               </div>
             </div>
           </div>

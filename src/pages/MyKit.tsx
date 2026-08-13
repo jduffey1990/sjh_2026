@@ -85,7 +85,11 @@ export default function MyKit() {
         </h1>
         <p className="mt-1 text-sm text-slate-400">
           Everything going in your bag — your own kit, plus the group gear you
-          claimed on the board.
+          claimed. Tick things off{" "}
+          <em className="not-italic text-slate-300">
+            as you physically pack them
+          </em>
+          ; claiming on the board is only a promise.
         </p>
 
         <div className="mt-4 flex items-center gap-3">
@@ -116,7 +120,7 @@ export default function MyKit() {
       <section>
         <div className="mb-2 flex items-baseline gap-2">
           <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Group gear you're carrying
+            Group gear you claimed
           </h2>
           {groupGear.length > 0 && (
             <span className="text-[11px] text-slate-600">
