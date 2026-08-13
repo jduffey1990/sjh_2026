@@ -62,18 +62,23 @@ npm run dev                  # http://localhost:5173/sjh_2026/
 ### Supabase
 
 1. Create a project at [supabase.com](https://supabase.com) (free tier is plenty).
-2. Run the migrations **in order**:
+2. Put `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and `DB_password` in
+   `.env.local` (see `.env.example`).
+3. Run the migrations **in order**. `supabase/psql.sh` builds the connection
+   from `.env.local`, so there is no connection string to paste:
 
    ```bash
-   psql "$DB_URI" -f supabase/schema.sql
-   psql "$DB_URI" -f supabase/seed.sql
-   psql "$DB_URI" -f supabase/002_planning.sql
-   psql "$DB_URI" -v pw='your-trip-password' -f supabase/003_auth.sql
+   ./supabase/psql.sh -f supabase/schema.sql
+   ./supabase/psql.sh -f supabase/seed.sql
+   ./supabase/psql.sh -f supabase/002_planning.sql
+   ./supabase/psql.sh -v pw=your-trip-password -f supabase/003_auth.sql
    ```
 
-3. Project Settings → API → copy the URL and **anon** key into `.env.local` as
-   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. (Vite only reads `VITE_`
-   prefixed variables — `NEXT_PUBLIC_*` names are silently ignored.)
+   It works for one-off queries too:
+   `./supabase/psql.sh -c 'select count(*) from claims'`
+
+Note Vite only reads `VITE_`-prefixed variables — `NEXT_PUBLIC_*` names are
+silently ignored, and the app will behave as though there is no backend.
 
 ## Access
 
@@ -89,9 +94,14 @@ returns `[]` from every table. The gate is enforced by Postgres.
 Sign-in persists and auto-refreshes, so you do it once. **Do it before you
 leave** — there's no signal to sign in with between Telluride and Gateway.
 
-To rotate the password, re-run `003_auth.sql` with a new `-v pw`. psql quotes
-and escapes the value itself, so pass it plain — apostrophes and all. The password
-is never committed to this repo; it's passed in at run time.
+To rotate the password:
+
+```bash
+./supabase/psql.sh -v pw=new-password -f supabase/003_auth.sql
+```
+
+psql quotes and escapes the value itself, so pass it plain — apostrophes and
+all. The password is never committed to this repo; it is passed in at run time.
 
 ⚠️ Still don't put anything sensitive in the database. One shared password among
 eight people is not access control in any serious sense — the Riders page holds

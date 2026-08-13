@@ -27,3 +27,6 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# cached pooler hostname, machine-specific
+.supabase-host.local
