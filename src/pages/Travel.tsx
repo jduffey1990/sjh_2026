@@ -1,26 +1,23 @@
-import { LOGISTICS } from '../data/travel'
-import { TRIP } from '../data/trip'
+import { LOGISTICS } from "../data/travel";
+import { TRIP } from "../data/trip";
 
-const STATUS: Record<
-  string,
-  { label: string; className: string }
-> = {
+const STATUS: Record<string, { label: string; className: string }> = {
   open: {
-    label: 'Needs deciding',
-    className: 'border-rock-600/50 bg-rock-600/15 text-rock-400',
+    label: "Needs deciding",
+    className: "border-rock-600/50 bg-rock-600/15 text-rock-400",
   },
   settled: {
-    label: 'Settled',
-    className: 'border-sage-500/40 bg-sage-500/10 text-sage-400',
+    label: "Settled",
+    className: "border-sage-500/40 bg-sage-500/10 text-sage-400",
   },
   info: {
-    label: 'Good to know',
-    className: 'border-ink-700 bg-ink-800/60 text-slate-400',
+    label: "Good to know",
+    className: "border-ink-700 bg-ink-800/60 text-slate-400",
   },
-}
+};
 
 export default function Travel() {
-  const open = LOGISTICS.filter((s) => s.status === 'open').length
+  const open = LOGISTICS.filter((s) => s.status === "open").length;
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -29,9 +26,10 @@ export default function Travel() {
           Travel & logistics
         </h1>
         <p className="mt-2 text-slate-400">
-          Everything that is not riding. {open > 0 && (
+          Everything that is not riding.{" "}
+          {open > 0 && (
             <span className="text-rock-400">
-              {open} item{open === 1 ? '' : 's'} still need a group decision.
+              {open} item{open === 1 ? "" : "s"} still need a group decision.
             </span>
           )}
         </p>
@@ -39,7 +37,7 @@ export default function Travel() {
 
       <div className="mt-6 space-y-4">
         {LOGISTICS.map((s) => {
-          const st = STATUS[s.status]
+          const st = STATUS[s.status];
           return (
             <section
               key={s.id}
@@ -69,22 +67,24 @@ export default function Travel() {
                       <dt className="text-[10px] uppercase tracking-wider text-slate-500">
                         {it.label}
                       </dt>
-                      <dd className="mt-0.5 text-sm text-slate-200">{it.value}</dd>
+                      <dd className="mt-0.5 text-sm text-slate-200">
+                        {it.value}
+                      </dd>
                     </div>
                   ))}
                 </dl>
               )}
             </section>
-          )
+          );
         })}
       </div>
 
       <p className="mt-8 text-center text-xs text-slate-600">
-        Operator: {TRIP.operator.name} ·{' '}
+        Operator: {TRIP.operator.name} ·{" "}
         <a href={`tel:${TRIP.operator.phone}`} className="underline">
           {TRIP.operator.phone}
         </a>
       </p>
     </div>
-  )
+  );
 }

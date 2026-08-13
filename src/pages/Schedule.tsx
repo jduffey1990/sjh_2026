@@ -1,24 +1,24 @@
-import { Link } from 'react-router-dom'
-import { DAYS, TOTALS, TRIP, type TripDay } from '../data/trip'
+import { Link } from "react-router-dom";
+import { DAYS, TOTALS, TRIP, type TripDay } from "../data/trip";
 
-const BASE = import.meta.env.BASE_URL
+const BASE = import.meta.env.BASE_URL;
 
 function Stat({
   value,
   label,
-  tone = 'default',
+  tone = "default",
 }: {
-  value: string
-  label: string
-  tone?: 'default' | 'warn'
+  value: string;
+  label: string;
+  tone?: "default" | "warn";
 }) {
   return (
     <div>
       <div
         className={[
-          'text-lg font-bold tabular-nums leading-none',
-          tone === 'warn' ? 'text-rock-400' : 'text-slate-100',
-        ].join(' ')}
+          "text-lg font-bold tabular-nums leading-none",
+          tone === "warn" ? "text-rock-400" : "text-slate-100",
+        ].join(" ")}
       >
         {value}
       </div>
@@ -26,33 +26,33 @@ function Stat({
         {label}
       </div>
     </div>
-  )
+  );
 }
 
 function DayCard({ d }: { d: TripDay }) {
-  const isTravel = d.kind === 'travel'
+  const isTravel = d.kind === "travel";
   // Day 6 is the outlier: least mileage, most climbing of the week.
-  const brutal = (d.gainFt ?? 0) >= 4000
+  const brutal = (d.gainFt ?? 0) >= 4000;
 
   return (
     <Link
       to={`/day/${d.id}`}
       className={[
-        'group relative flex flex-col overflow-hidden rounded-2xl border bg-ink-900/60 transition-all',
-        'hover:-translate-y-0.5 hover:border-ink-700 hover:bg-ink-900',
-        isTravel ? 'border-ink-800/60 border-dashed' : 'border-ink-800',
-      ].join(' ')}
+        "group relative flex flex-col overflow-hidden rounded-2xl border bg-ink-900/60 transition-all",
+        "hover:-translate-y-0.5 hover:border-ink-700 hover:bg-ink-900",
+        isTravel ? "border-ink-800/60 border-dashed" : "border-ink-800",
+      ].join(" ")}
     >
       <div className="flex items-start gap-3 p-4 pb-3">
         <div
           className={[
-            'grid size-11 shrink-0 place-items-center rounded-xl text-sm font-black',
+            "grid size-11 shrink-0 place-items-center rounded-xl text-sm font-black",
             isTravel
-              ? 'border border-dashed border-ink-700 text-slate-500'
-              : 'bg-gradient-to-br from-rock-500 to-aspen-500 text-ink-950',
-          ].join(' ')}
+              ? "border border-dashed border-ink-700 text-slate-500"
+              : "bg-gradient-to-br from-rock-500 to-aspen-500 text-ink-950",
+          ].join(" ")}
         >
-          {isTravel ? '→' : d.day}
+          {isTravel ? "→" : d.day}
         </div>
 
         <div className="min-w-0 flex-1">
@@ -62,7 +62,9 @@ function DayCard({ d }: { d: TripDay }) {
             </span>
             <span className="text-[11px] text-slate-500">{d.dateLabel}</span>
           </div>
-          <h3 className="mt-0.5 truncate font-bold text-slate-100">{d.title}</h3>
+          <h3 className="mt-0.5 truncate font-bold text-slate-100">
+            {d.title}
+          </h3>
         </div>
       </div>
 
@@ -85,7 +87,7 @@ function DayCard({ d }: { d: TripDay }) {
           <Stat
             value={`${d.gainFt.toLocaleString()}′`}
             label="climbing"
-            tone={brutal ? 'warn' : 'default'}
+            tone={brutal ? "warn" : "default"}
           />
         )}
         {d.highPointFt != null && (
@@ -98,13 +100,16 @@ function DayCard({ d }: { d: TripDay }) {
           <span className="text-[11px] leading-snug text-rock-400">
             ⚑ {d.flags[0]}
             {d.flags.length > 1 && (
-              <span className="text-slate-600"> +{d.flags.length - 1} more</span>
+              <span className="text-slate-600">
+                {" "}
+                +{d.flags.length - 1} more
+              </span>
             )}
           </span>
         </div>
       )}
     </Link>
-  )
+  );
 }
 
 export default function Schedule() {
@@ -150,5 +155,5 @@ export default function Schedule() {
         file and take a minute to correct.
       </p>
     </div>
-  )
+  );
 }

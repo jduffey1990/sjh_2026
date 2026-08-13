@@ -3,19 +3,19 @@ export default function Stepper({
   onChange,
   min = 0,
   label,
-  tone = 'default',
+  tone = "default",
   disabled,
 }: {
-  value: number
-  onChange: (n: number) => void
-  min?: number
-  label: string
-  tone?: 'default' | 'mine'
-  disabled?: boolean
+  value: number;
+  onChange: (n: number) => void;
+  min?: number;
+  label: string;
+  tone?: "default" | "mine";
+  disabled?: boolean;
 }) {
   const btn =
-    'tap-target grid place-items-center px-2.5 text-lg leading-none select-none ' +
-    'text-slate-400 hover:text-slate-100 disabled:opacity-25 disabled:hover:text-slate-400'
+    "tap-target grid place-items-center px-2.5 text-lg leading-none select-none " +
+    "text-slate-400 hover:text-slate-100 disabled:opacity-25 disabled:hover:text-slate-400";
 
   return (
     <div className="flex items-center gap-2">
@@ -24,11 +24,11 @@ export default function Stepper({
       </span>
       <div
         className={[
-          'flex items-center rounded-lg border',
-          tone === 'mine'
-            ? 'border-aspen-500/40 bg-aspen-500/10'
-            : 'border-ink-700 bg-ink-950/50',
-        ].join(' ')}
+          "flex items-center rounded-lg border",
+          tone === "mine"
+            ? "border-aspen-500/40 bg-aspen-500/10"
+            : "border-ink-700 bg-ink-950/50",
+        ].join(" ")}
       >
         <button
           type="button"
@@ -41,9 +41,9 @@ export default function Stepper({
         </button>
         <span
           className={[
-            'w-8 text-center text-sm font-bold tabular-nums',
-            tone === 'mine' ? 'text-aspen-300' : 'text-slate-100',
-          ].join(' ')}
+            "w-8 text-center text-sm font-bold tabular-nums",
+            tone === "mine" ? "text-aspen-300" : "text-slate-100",
+          ].join(" ")}
         >
           {value}
         </span>
@@ -58,5 +58,5 @@ export default function Stepper({
         </button>
       </div>
     </div>
-  )
+  );
 }

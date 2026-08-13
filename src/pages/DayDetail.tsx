@@ -1,12 +1,12 @@
-import { Link, useParams } from 'react-router-dom'
-import { DAYS } from '../data/trip'
+import { Link, useParams } from "react-router-dom";
+import { DAYS } from "../data/trip";
 
-const BASE = import.meta.env.BASE_URL
+const BASE = import.meta.env.BASE_URL;
 
 export default function DayDetail() {
-  const { id } = useParams()
-  const idx = DAYS.findIndex((d) => d.id === id)
-  const d = DAYS[idx]
+  const { id } = useParams();
+  const idx = DAYS.findIndex((d) => d.id === id);
+  const d = DAYS[idx];
 
   if (!d) {
     return (
@@ -16,11 +16,11 @@ export default function DayDetail() {
           Back to schedule
         </Link>
       </div>
-    )
+    );
   }
 
-  const prev = DAYS[idx - 1]
-  const next = DAYS[idx + 1]
+  const prev = DAYS[idx - 1];
+  const next = DAYS[idx + 1];
 
   return (
     <article className="mx-auto max-w-3xl">
@@ -34,7 +34,7 @@ export default function DayDetail() {
       <header className="topo mt-4 overflow-hidden rounded-2xl border border-ink-800 p-6">
         <div className="flex items-baseline gap-2">
           <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-aspen-500">
-            {d.kind === 'travel' ? 'Travel day' : `Day ${d.day}`}
+            {d.kind === "travel" ? "Travel day" : `Day ${d.day}`}
           </span>
           <span className="text-[11px] text-slate-500">
             {d.weekday} {d.dateLabel}
@@ -62,9 +62,9 @@ export default function DayDetail() {
             <div>
               <div
                 className={[
-                  'text-xl font-bold tabular-nums',
-                  d.gainFt >= 4000 ? 'text-rock-400' : 'text-slate-100',
-                ].join(' ')}
+                  "text-xl font-bold tabular-nums",
+                  d.gainFt >= 4000 ? "text-rock-400" : "text-slate-100",
+                ].join(" ")}
               >
                 {d.gainFt.toLocaleString()}′
               </div>
@@ -170,5 +170,5 @@ export default function DayDetail() {
         )}
       </nav>
     </article>
-  )
+  );
 }

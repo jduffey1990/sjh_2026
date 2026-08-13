@@ -1,34 +1,34 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
-import { TRIP } from '../data/trip'
-import { useRider } from '../lib/useRider'
-import RiderPicker from './RiderPicker'
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { TRIP } from "../data/trip";
+import { useRider } from "../lib/useRider";
+import RiderPicker from "./RiderPicker";
 
 const NAV = [
-  { to: '/', label: 'Schedule', icon: '▤', end: true },
-  { to: '/board', label: 'Packing', icon: '☰' },
-  { to: '/kit', label: 'My kit', icon: '✓' },
-  { to: '/travel', label: 'Travel', icon: '⛰' },
-  { to: '/riders', label: 'Riders', icon: '◍' },
-  { to: '/gallery', label: 'Photos', icon: '◲' },
-]
+  { to: "/", label: "Schedule", icon: "▤", end: true },
+  { to: "/board", label: "Packing", icon: "☰" },
+  { to: "/kit", label: "My kit", icon: "✓" },
+  { to: "/travel", label: "Travel", icon: "⛰" },
+  { to: "/riders", label: "Riders", icon: "◍" },
+  { to: "/gallery", label: "Photos", icon: "◲" },
+];
 
 function daysOut(): number {
-  const start = new Date(`${TRIP.startDate}T00:00:00`)
-  const now = new Date()
-  return Math.ceil((start.getTime() - now.getTime()) / 86_400_000)
+  const start = new Date(`${TRIP.startDate}T00:00:00`);
+  const now = new Date();
+  return Math.ceil((start.getTime() - now.getTime()) / 86_400_000);
 }
 
 export default function Layout() {
-  const { pathname } = useLocation()
-  const { rider } = useRider()
+  const { pathname } = useLocation();
+  const { rider } = useRider();
 
   // Route changes should start at the top, not wherever the last page was.
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [pathname])
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
-  const out = daysOut()
+  const out = daysOut();
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -73,11 +73,11 @@ export default function Layout() {
                 end={n.end}
                 className={({ isActive }) =>
                   [
-                    'border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+                    "border-b-2 px-3 py-2 text-sm font-medium transition-colors",
                     isActive
-                      ? 'border-rock-500 text-slate-100'
-                      : 'border-transparent text-slate-400 hover:text-slate-200',
-                  ].join(' ')
+                      ? "border-rock-500 text-slate-100"
+                      : "border-transparent text-slate-400 hover:text-slate-200",
+                  ].join(" ")
                 }
               >
                 {n.label}
@@ -92,7 +92,7 @@ export default function Layout() {
       </main>
 
       <footer className="hidden md:block border-t border-ink-800/60 px-4 py-6 text-center text-xs text-slate-600">
-        Route info and photos courtesy of{' '}
+        Route info and photos courtesy of{" "}
         <a
           href={TRIP.operator.url}
           target="_blank"
@@ -113,9 +113,9 @@ export default function Layout() {
             end={n.end}
             className={({ isActive }) =>
               [
-                'tap-target flex flex-col items-center justify-center gap-0.5 py-2 text-[10px]',
-                isActive ? 'text-aspen-400' : 'text-slate-500',
-              ].join(' ')
+                "tap-target flex flex-col items-center justify-center gap-0.5 py-2 text-[10px]",
+                isActive ? "text-aspen-400" : "text-slate-500",
+              ].join(" ")
             }
           >
             <span className="text-base leading-none">{n.icon}</span>
@@ -124,5 +124,5 @@ export default function Layout() {
         ))}
       </nav>
     </div>
-  )
+  );
 }

@@ -1,50 +1,50 @@
-import { useEffect, useRef, useState } from 'react'
-import { useRider } from '../lib/useRider'
+import { useEffect, useRef, useState } from "react";
+import { useRider } from "../lib/useRider";
 
 export function Avatar({
   initials,
   color,
-  size = 'md',
+  size = "md",
   dim = false,
 }: {
-  initials: string
-  color: string
-  size?: 'sm' | 'md'
-  dim?: boolean
+  initials: string;
+  color: string;
+  size?: "sm" | "md";
+  dim?: boolean;
 }) {
   return (
     <span
       className={[
-        'grid shrink-0 place-items-center rounded-full font-bold text-ink-950',
-        size === 'sm' ? 'size-5 text-[9px]' : 'size-7 text-[11px]',
-        dim ? 'opacity-40' : '',
-      ].join(' ')}
+        "grid shrink-0 place-items-center rounded-full font-bold text-ink-950",
+        size === "sm" ? "size-5 text-[9px]" : "size-7 text-[11px]",
+        dim ? "opacity-40" : "",
+      ].join(" ")}
       style={{ backgroundColor: color }}
       aria-hidden
     >
       {initials}
     </span>
-  )
+  );
 }
 
 export default function RiderPicker() {
-  const { rider, setRider, riders } = useRider()
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const { rider, setRider, riders } = useRider();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!open) return
+    if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false)
-    }
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    document.addEventListener('mousedown', onDown)
-    document.addEventListener('keydown', onKey)
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [open])
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
 
   return (
     <div ref={ref} className="relative">
@@ -58,7 +58,7 @@ export default function RiderPicker() {
           <>
             <Avatar initials={rider.initials} color={rider.color} />
             <span className="hidden sm:inline text-slate-300">
-              {rider.name.split(' ')[0]}
+              {rider.name.split(" ")[0]}
             </span>
           </>
         ) : (
@@ -85,13 +85,15 @@ export default function RiderPicker() {
               role="option"
               aria-selected={rider?.name === r.name}
               onClick={() => {
-                setRider(r)
-                setOpen(false)
+                setRider(r);
+                setOpen(false);
               }}
               className={[
-                'flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-ink-800',
-                rider?.name === r.name ? 'bg-ink-850 text-slate-100' : 'text-slate-300',
-              ].join(' ')}
+                "flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors hover:bg-ink-800",
+                rider?.name === r.name
+                  ? "bg-ink-850 text-slate-100"
+                  : "text-slate-300",
+              ].join(" ")}
             >
               <Avatar initials={r.initials} color={r.color} />
               {r.name}
@@ -103,8 +105,8 @@ export default function RiderPicker() {
           {rider && (
             <button
               onClick={() => {
-                setRider(null)
-                setOpen(false)
+                setRider(null);
+                setOpen(false);
               }}
               className="w-full border-t border-ink-800 px-3 py-2 text-left text-xs text-slate-500 hover:bg-ink-800 hover:text-slate-300"
             >
@@ -114,5 +116,5 @@ export default function RiderPicker() {
         </div>
       )}
     </div>
-  )
+  );
 }

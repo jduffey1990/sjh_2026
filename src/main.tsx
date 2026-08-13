@@ -1,17 +1,17 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { HashRouter, Routes, Route } from 'react-router-dom'
-import './index.css'
-import Layout from './components/Layout'
-import Schedule from './pages/Schedule'
-import DayDetail from './pages/DayDetail'
-import Travel from './pages/Travel'
-import Gallery from './pages/Gallery'
-import Board from './pages/Board'
-import MyKit from './pages/MyKit'
-import Riders from './pages/Riders'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { HashRouter, Routes, Route } from "react-router-dom";
+import "./index.css";
+import Layout from "./components/Layout";
+import Schedule from "./pages/Schedule";
+import DayDetail from "./pages/DayDetail";
+import Travel from "./pages/Travel";
+import Gallery from "./pages/Gallery";
+import Board from "./pages/Board";
+import MyKit from "./pages/MyKit";
+import Riders from "./pages/Riders";
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <HashRouter>
       <Routes>
@@ -27,4 +27,4 @@ createRoot(document.getElementById('root')!).render(
       </Routes>
     </HashRouter>
   </StrictMode>,
-)
+);

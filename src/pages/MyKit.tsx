@@ -1,38 +1,38 @@
-import { useMemo, useState } from 'react'
-import SyncBadge from '../components/SyncBadge'
-import RiderPicker from '../components/RiderPicker'
-import { useDbRider, useSnapshot, store } from '../lib/useStore'
-import { hasBackend } from '../lib/supabase'
+import { useMemo, useState } from "react";
+import SyncBadge from "../components/SyncBadge";
+import RiderPicker from "../components/RiderPicker";
+import { useDbRider, useSnapshot, store } from "../lib/useStore";
+import { hasBackend } from "../lib/supabase";
 
 export default function MyKit() {
-  const snap = useSnapshot()
-  const me = useDbRider()
-  const [adding, setAdding] = useState(false)
-  const [name, setName] = useState('')
+  const snap = useSnapshot();
+  const me = useDbRider();
+  const [adding, setAdding] = useState(false);
+  const [name, setName] = useState("");
 
   const { byCategory, packed, total } = useMemo(() => {
     const mine = snap.personalItems
       .filter((p) => p.rider_id === me?.id)
-      .sort((a, b) => a.sort_order - b.sort_order)
-    const map = new Map<string, typeof mine>()
+      .sort((a, b) => a.sort_order - b.sort_order);
+    const map = new Map<string, typeof mine>();
     for (const p of mine) {
-      const list = map.get(p.category)
-      if (list) list.push(p)
-      else map.set(p.category, [p])
+      const list = map.get(p.category);
+      if (list) list.push(p);
+      else map.set(p.category, [p]);
     }
     return {
       byCategory: [...map.entries()],
       packed: mine.filter((p) => p.packed).length,
       total: mine.length,
-    }
-  }, [snap.personalItems, me])
+    };
+  }, [snap.personalItems, me]);
 
   if (!hasBackend) {
     return (
       <p className="py-16 text-center text-sm text-slate-500">
         Personal kit needs the Supabase connection — see the Packing board.
       </p>
-    )
+    );
   }
 
   if (!me) {
@@ -46,16 +46,16 @@ export default function MyKit() {
           <RiderPicker />
         </div>
       </div>
-    )
+    );
   }
 
-  const pct = total ? Math.round((packed / total) * 100) : 0
+  const pct = total ? Math.round((packed / total) * 100) : 0;
 
   return (
     <div className="mx-auto max-w-2xl space-y-5">
       <header className="topo overflow-hidden rounded-2xl border border-ink-800 p-6">
         <h1 className="text-2xl font-black tracking-tight text-slate-50">
-          {me.name.split(' ')[0]}'s kit
+          {me.name.split(" ")[0]}'s kit
         </h1>
         <p className="mt-1 text-sm text-slate-400">
           Your own gear. None of this counts toward the group load balance.
@@ -103,11 +103,11 @@ export default function MyKit() {
                   />
                   <span
                     className={[
-                      'flex-1 text-sm',
+                      "flex-1 text-sm",
                       p.packed
-                        ? 'text-slate-500 line-through'
-                        : 'text-slate-200',
-                    ].join(' ')}
+                        ? "text-slate-500 line-through"
+                        : "text-slate-200",
+                    ].join(" ")}
                   >
                     {p.name}
                   </span>
@@ -115,8 +115,8 @@ export default function MyKit() {
                     <button
                       type="button"
                       onClick={(e) => {
-                        e.preventDefault()
-                        store.deletePersonal(p.id)
+                        e.preventDefault();
+                        store.deletePersonal(p.id);
                       }}
                       className="text-slate-700 hover:text-rock-400"
                       aria-label={`Remove ${p.name}`}
@@ -134,11 +134,11 @@ export default function MyKit() {
       {adding ? (
         <form
           onSubmit={(e) => {
-            e.preventDefault()
-            if (!name.trim()) return
-            store.addPersonal(me.id, name.trim(), 'Other')
-            setName('')
-            setAdding(false)
+            e.preventDefault();
+            if (!name.trim()) return;
+            store.addPersonal(me.id, name.trim(), "Other");
+            setName("");
+            setAdding(false);
           }}
           className="flex gap-2"
         >
@@ -165,5 +165,5 @@ export default function MyKit() {
         </button>
       )}
     </div>
-  )
+  );
 }

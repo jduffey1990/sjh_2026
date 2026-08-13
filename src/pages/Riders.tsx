@@ -1,36 +1,36 @@
-import { Avatar } from '../components/RiderPicker'
-import SyncBadge from '../components/SyncBadge'
-import { useSnapshot, useCompatibility, store } from '../lib/useStore'
-import { hasBackend } from '../lib/supabase'
-import { RIDERS } from '../data/trip'
-import type { DbRider } from '../lib/types'
+import { Avatar } from "../components/RiderPicker";
+import SyncBadge from "../components/SyncBadge";
+import { useSnapshot, useCompatibility, store } from "../lib/useStore";
+import { hasBackend } from "../lib/supabase";
+import { RIDERS } from "../data/trip";
+import type { DbRider } from "../lib/types";
 
 const FIELDS: {
-  key: keyof DbRider
-  label: string
-  placeholder: string
-  hint?: string
+  key: keyof DbRider;
+  label: string;
+  placeholder: string;
+  hint?: string;
 }[] = [
-  { key: 'bike', label: 'Bike', placeholder: 'Trek Fuel EX 8' },
+  { key: "bike", label: "Bike", placeholder: "Trek Fuel EX 8" },
   {
-    key: 'chain_speed',
-    label: 'Chain',
-    placeholder: 'SRAM 12sp',
-    hint: 'Power Links must match every chain in the group',
+    key: "chain_speed",
+    label: "Chain",
+    placeholder: "SRAM 12sp",
+    hint: "Power Links must match every chain in the group",
   },
   {
-    key: 'hanger_model',
-    label: 'Derailleur hanger',
-    placeholder: 'Trek #333',
-    hint: 'Hangers are not interchangeable between bikes',
+    key: "hanger_model",
+    label: "Derailleur hanger",
+    placeholder: "Trek #333",
+    hint: "Hangers are not interchangeable between bikes",
   },
-  { key: 'tire_size', label: 'Tire size', placeholder: '29 x 2.4' },
-  { key: 'brake_pad_type', label: 'Brake pads', placeholder: 'Shimano B01S' },
-]
+  { key: "tire_size", label: "Tire size", placeholder: "29 x 2.4" },
+  { key: "brake_pad_type", label: "Brake pads", placeholder: "Shimano B01S" },
+];
 
 export default function Riders() {
-  const snap = useSnapshot()
-  const warnings = useCompatibility()
+  const snap = useSnapshot();
+  const warnings = useCompatibility();
 
   // Without a backend, still show the roster from static data.
   if (!hasBackend || snap.riders.length === 0) {
@@ -54,7 +54,7 @@ export default function Riders() {
           Bike specs need the Supabase connection — see the Packing board.
         </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -119,7 +119,7 @@ export default function Riders() {
                     {f.label}
                   </span>
                   <input
-                    defaultValue={(r[f.key] as string) ?? ''}
+                    defaultValue={(r[f.key] as string) ?? ""}
                     placeholder={f.placeholder}
                     onBlur={(e) =>
                       store.updateRider(r.id, {
@@ -140,5 +140,5 @@ export default function Riders() {
         ))}
       </div>
     </div>
-  )
+  );
 }
