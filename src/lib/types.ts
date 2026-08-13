@@ -92,6 +92,17 @@ export interface LogisticsField {
   updated_at: string;
 }
 
+export interface LogisticsSection {
+  id: string;
+  slug: string;
+  title: string;
+  body: string[];
+  sort_order: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface SeenMarker {
   id: string;
   rider_id: string;
@@ -109,6 +120,7 @@ export interface Snapshot {
   comments: Comment[];
   logisticsFields: LogisticsField[];
   seenMarkers: SeenMarker[];
+  logisticsSections: LogisticsSection[];
 }
 
 export const EMPTY: Snapshot = {
@@ -120,6 +132,7 @@ export const EMPTY: Snapshot = {
   comments: [],
   logisticsFields: [],
   seenMarkers: [],
+  logisticsSections: [],
 };
 
 export type SyncStatus =
@@ -136,7 +149,8 @@ export interface OutboxEntry {
     | "decisions"
     | "comments"
     | "logistics_fields"
-    | "seen_markers";
+    | "seen_markers"
+    | "logistics_sections";
   op: "upsert" | "delete";
   payload: Record<string, unknown>;
   ts: number;

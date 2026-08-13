@@ -13,6 +13,7 @@ import {
   type Comment,
   type LogisticsField,
   type SeenMarker,
+  type LogisticsSection,
   type Scope,
 } from "./types";
 
@@ -41,6 +42,7 @@ const CONFLICT_TARGET: Record<Table, string> = {
   comments: "id",
   logistics_fields: "id",
   seen_markers: "rider_id,scope,scope_id",
+  logistics_sections: "id",
 };
 
 const TABLE_TO_FIELD: Record<Table, keyof Snapshot> = {
@@ -52,6 +54,7 @@ const TABLE_TO_FIELD: Record<Table, keyof Snapshot> = {
   comments: "comments",
   logistics_fields: "logisticsFields",
   seen_markers: "seenMarkers",
+  logistics_sections: "logisticsSections",
 };
 
 /**
@@ -148,6 +151,7 @@ class Store {
         comments,
         logisticsFields,
         seenMarkers,
+        logisticsSections,
       ] = await Promise.all([
         supabase.from("riders").select("*").order("sort_order"),
         supabase.from("group_items").select("*").order("name"),
@@ -157,6 +161,7 @@ class Store {
         supabase.from("comments").select("*").order("created_at"),
         supabase.from("logistics_fields").select("*").order("sort_order"),
         supabase.from("seen_markers").select("*"),
+        supabase.from("logistics_sections").select("*").order("sort_order"),
       ]);
       const err =
         riders.error ||
@@ -166,7 +171,8 @@ class Store {
         decisions.error ||
         comments.error ||
         logisticsFields.error ||
-        seenMarkers.error;
+        seenMarkers.error ||
+        logisticsSections.error;
       if (err) throw err;
 
       this.setSnap({
@@ -178,6 +184,7 @@ class Store {
         comments: (comments.data ?? []) as Comment[],
         logisticsFields: (logisticsFields.data ?? []) as LogisticsField[],
         seenMarkers: (seenMarkers.data ?? []) as SeenMarker[],
+        logisticsSections: (logisticsSections.data ?? []) as LogisticsSection[],
       });
       this.setStatus("ready");
     } catch {
@@ -499,12 +506,118 @@ class Store {
     });
   }
 
+  // ---- logistics sections -------------------------------------------
+
+  /**
+   * `slug` is the join key for fields, decisions and read state, so it is
+   * generated once from the title and then never changed -- renaming a
+   * section must not orphan its decisions.
+   */
+  addSection(title: string, by: string | null) {
+    const base =
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 40) || "section";
+    const taken = new Set(this.snap.logisticsSections.map((s) => s.slug));
+    let slug = base;
+    for (let n = 2; taken.has(slug); n++) slug = `${base}-${n}`;
+
+    const now = new Date().toISOString();
+    const maxOrder = Math.max(
+      0,
+      ...this.snap.logisticsSections.map((s) => s.sort_order),
+    );
+    this.write<"logisticsSections">("logistics_sections", {
+      id: crypto.randomUUID(),
+      slug,
+      title,
+      body: [],
+      sort_order: maxOrder + 10,
+      created_by: by,
+      created_at: now,
+      updated_at: now,
+    });
+    return slug;
+  }
+
+  updateSection(id: string, patch: Partial<LogisticsSection>) {
+    const s = this.snap.logisticsSections.find((x) => x.id === id);
+    if (!s) return;
+    // slug is intentionally not patchable -- see addSection.
+    const { slug: _slug, ...safe } = patch;
+    void _slug;
+    this.write<"logisticsSections">("logistics_sections", {
+      ...s,
+      ...safe,
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  /** Refuses while anything still points at the section. */
+  canDeleteSection(slug: string) {
+    const hasDecisions = this.snap.decisions.some(
+      (d) => d.scope === "logistics" && d.scope_id === slug,
+    );
+    const hasComments = this.snap.comments.some(
+      (c) => c.scope === "logistics" && c.scope_id === slug,
+    );
+    return !hasDecisions && !hasComments;
+  }
+
+  deleteSection(id: string) {
+    const s = this.snap.logisticsSections.find((x) => x.id === id);
+    if (!s || !this.canDeleteSection(s.slug)) return;
+    for (const f of this.snap.logisticsFields.filter(
+      (f) => f.section_id === s.slug,
+    )) {
+      this.remove("logistics_fields", f.id);
+    }
+    this.remove("logistics_sections", id);
+  }
+
+  addField(sectionSlug: string, label: string, by: string | null) {
+    const maxOrder = Math.max(
+      0,
+      ...this.snap.logisticsFields
+        .filter((f) => f.section_id === sectionSlug)
+        .map((f) => f.sort_order),
+    );
+    this.write<"logisticsFields">("logistics_fields", {
+      id: crypto.randomUUID(),
+      section_id: sectionSlug,
+      label,
+      value: null,
+      sort_order: maxOrder + 1,
+      updated_by: by,
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  /** Rename a field. The value edit path is setLogisticsField. */
+  updateField(id: string, patch: Partial<LogisticsField>, by: string | null) {
+    const f = this.snap.logisticsFields.find((x) => x.id === id);
+    if (!f) return;
+    this.write<"logisticsFields">("logistics_fields", {
+      ...f,
+      ...patch,
+      updated_by: by,
+      updated_at: new Date().toISOString(),
+    });
+  }
+
+  deleteField(id: string) {
+    this.remove("logistics_fields", id);
+  }
+
   // ---- read state ---------------------------------------------------
 
   /** Record that a rider has now looked at a day or logistics section. */
   markSeen(riderId: string, scope: "day" | "logistics", scopeId: string) {
     const existing = this.snap.seenMarkers.find(
-      (m) => m.rider_id === riderId && m.scope === scope && m.scope_id === scopeId,
+      (m) =>
+        m.rider_id === riderId && m.scope === scope && m.scope_id === scopeId,
     );
     this.write<"seenMarkers">("seen_markers", {
       id: existing?.id ?? crypto.randomUUID(),
