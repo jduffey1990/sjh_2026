@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Env files -- .env.local.bak is NOT covered by the "*.local" rule above
+.env
+.env.*
+!.env.example
