@@ -14,21 +14,24 @@
 --
 -- HOW TO RUN -- the password must NOT be committed to this repo:
 --
---   psql "$DB_URI" -v pw="'the-shared-password'" -f supabase/003_auth.sql
+--   psql "$DB_URI" -v pw='the-shared-password' -f supabase/003_auth.sql
 --
--- Note the doubled quotes: psql needs the value to arrive as a SQL literal.
 -- To change the password later, re-run this file with a new -v pw.
 -- =====================================================================
 
 \if :{?pw}
 \else
-  \echo '!! Missing password. Run with:  -v pw="''your-password''"'
-  \quit 1
+  \echo '!! Missing password. Run with:  -v pw=your-password'
+  \quit
 \endif
 
 -- psql does not substitute :variables inside dollar-quoted blocks, so hand
 -- the password over as a session setting the DO block can read back.
-select set_config('sjh.pw', :pw, false);
+--
+-- :'pw' (rather than bare :pw) makes psql quote and escape the value into a
+-- SQL literal itself, so the caller passes a plain password and one
+-- containing an apostrophe can neither break the script nor inject SQL.
+select set_config('sjh.pw', :'pw', false);
 
 -- ---------------------------------------------------------------------
 -- The shared account. Upsert so re-running rotates the password rather

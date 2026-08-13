@@ -8,17 +8,18 @@ functions and no Vercel project involved.
 
 ## What's here
 
-| Page | Needs backend? |
+| Page | Without Supabase |
 | --- | --- |
-| Schedule — 8 day cards with mileage, climbing and elevation profiles | no |
-| Route detail — per-day terrain, alternates, decisions to make | no |
-| Travel & logistics — Ridgway, vehicles, the day 6 shuttle, hut info | no |
-| Gallery — route photos | no |
-| **Packing board** — shared group manifest with claims and load balance | yes |
-| My kit — personal checklist | yes |
-| Riders — bike specs feeding the compatibility checks | yes |
+| Schedule — 8 day cards with mileage, climbing and elevation profiles | full, minus open-decision counts |
+| Route detail — per-day terrain and alternates | full, minus decisions and comments |
+| Travel & logistics — Ridgway, vehicles, day 6 shuttle, hut info | full, but values are read-only |
+| Gallery — route photos | full |
+| **Packing board** — group manifest with claims and load balance | needs backend |
+| My kit — personal checklist | needs backend |
+| Riders — bike specs feeding the compatibility checks | roster only |
 
-The four static pages work with no Supabase configured at all.
+The route content is static, so the trip stays readable even with no Supabase
+configured; the collaborative layers simply don't render.
 
 ## The packing board
 
@@ -67,7 +68,7 @@ npm run dev                  # http://localhost:5173/sjh_2026/
    psql "$DB_URI" -f supabase/schema.sql
    psql "$DB_URI" -f supabase/seed.sql
    psql "$DB_URI" -f supabase/002_planning.sql
-   psql "$DB_URI" -v pw="'your-trip-password'" -f supabase/003_auth.sql
+   psql "$DB_URI" -v pw='your-trip-password' -f supabase/003_auth.sql
    ```
 
 3. Project Settings → API → copy the URL and **anon** key into `.env.local` as
@@ -88,7 +89,8 @@ returns `[]` from every table. The gate is enforced by Postgres.
 Sign-in persists and auto-refreshes, so you do it once. **Do it before you
 leave** — there's no signal to sign in with between Telluride and Gateway.
 
-To rotate the password, re-run `003_auth.sql` with a new `-v pw`. The password
+To rotate the password, re-run `003_auth.sql` with a new `-v pw`. psql quotes
+and escapes the value itself, so pass it plain — apostrophes and all. The password
 is never committed to this repo; it's passed in at run time.
 
 ⚠️ Still don't put anything sensitive in the database. One shared password among
