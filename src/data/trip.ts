@@ -267,6 +267,7 @@ export const DAYS: TripDay[] = [
       "Predominantly downhill and the best finish in hut-to-hut riding: alpine forest gives way to sage, sage gives way to red slickrock, and the whole thing tips into Moab.",
       "Porcupine Rim is the alternate for anyone with legs and skills left after six days. It is a serious, chunky descent — not a casual add-on at the end of a long week.",
       "Still 2,743 ft of climbing before the descent, so it is not a freebie.",
+      "The hut nights end here — tonight is a bed in Moab. The shuttle back to the vehicles is tomorrow, not today.",
     ],
     alternates: [
       "Porcupine Rim Trail — legendary, technical, and a big ask on day 7.",
