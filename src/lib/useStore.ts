@@ -183,3 +183,98 @@ export function useCompatibility(): Warning[] {
 }
 
 export { store };
+
+
+export interface Unread {
+  total: number;
+  comments: number;
+  raised: number;
+  resolved: number;
+  /** When you last looked, so a page can show "new since". */
+  since: string | null;
+}
+
+const NEVER = "1970-01-01T00:00:00Z";
+
+/**
+ * Per-rider unread counts for every day and logistics section.
+ *
+ * Read state is one "last looked at" timestamp per rider per scope, so
+ * anything stamped later than that is new. Your own comments, decisions and
+ * resolutions never count -- being notified about what you just did is noise.
+ *
+ * Comments on a decision roll up to whatever the decision hangs off, since
+ * that is where you would go looking for them.
+ */
+export function useUnread(): Map<string, Unread> {
+  const snap = useSnapshot();
+  const me = useDbRider();
+
+  return useMemo(() => {
+    const out = new Map<string, Unread>();
+    if (!me) return out;
+
+    const seenFor = (scope: string, scopeId: string) =>
+      snap.seenMarkers.find(
+        (m) =>
+          m.rider_id === me.id && m.scope === scope && m.scope_id === scopeId,
+      )?.seen_at ?? NEVER;
+
+    // Which day / logistics section does each decision belong to?
+    const decisionHome = new Map(
+      snap.decisions.map((d) => [d.id, `${d.scope}::${d.scope_id}`]),
+    );
+
+    const bump = (
+      key: string,
+      field: "comments" | "raised" | "resolved",
+      since: string,
+    ) => {
+      const cur =
+        out.get(key) ??
+        { total: 0, comments: 0, raised: 0, resolved: 0, since };
+      cur[field] += 1;
+      cur.total += 1;
+      out.set(key, cur);
+    };
+
+    for (const d of snap.decisions) {
+      const key = `${d.scope}::${d.scope_id}`;
+      const since = seenFor(d.scope, d.scope_id);
+      if (d.created_at > since && d.created_by && d.created_by !== me.id) {
+        bump(key, "raised", since);
+      }
+      if (
+        d.status === "resolved" &&
+        d.resolved_at &&
+        d.resolved_at > since &&
+        d.resolved_by !== me.id
+      ) {
+        bump(key, "resolved", since);
+      }
+    }
+
+    for (const c of snap.comments) {
+      if (c.rider_id === me.id) continue;
+      const key =
+        c.scope === "decision"
+          ? decisionHome.get(c.scope_id)
+          : `${c.scope}::${c.scope_id}`;
+      if (!key) continue;
+      const [scope, scopeId] = key.split("::");
+      if (c.created_at > seenFor(scope, scopeId)) {
+        bump(key, "comments", seenFor(scope, scopeId));
+      }
+    }
+
+    return out;
+  }, [snap, me]);
+}
+
+/** Convenience for a single scope. */
+export function useUnreadFor(
+  scope: "day" | "logistics",
+  scopeId: string,
+): Unread | null {
+  return useUnread().get(`${scope}::${scopeId}`) ?? null;
+}

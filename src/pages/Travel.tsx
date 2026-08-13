@@ -1,11 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LOGISTICS } from "../data/travel";
 import { TRIP } from "../data/trip";
 import Decisions from "../components/Decisions";
 import Comments from "../components/Comments";
 import SyncBadge from "../components/SyncBadge";
 import { hasBackend } from "../lib/supabase";
-import { useSnapshot, useDbRider, store } from "../lib/useStore";
+import { useSnapshot, useDbRider, useUnread, store } from "../lib/useStore";
 import type { LogisticsField } from "../lib/types";
 
 /** An editable label/value pair. Anyone can fill one in; everyone sees it. */
@@ -57,6 +57,27 @@ function Field({ f }: { f: LogisticsField }) {
 
 export default function Travel() {
   const snap = useSnapshot();
+  const me = useDbRider();
+  const unread = useUnread();
+
+  // Every section is visible at once here, so opening the page counts as
+  // seeing all of them. Freeze the counts first so the badges survive the
+  // render that clears them.
+  const [arrived, setArrived] = useState<Map<string, number>>(new Map());
+  const marked = useRef(false);
+
+  useEffect(() => {
+    if (!me || marked.current) return;
+    marked.current = true;
+    const frozen = new Map<string, number>();
+    for (const s of LOGISTICS) {
+      const u = unread.get(`logistics::${s.id}`);
+      if (u?.total) frozen.set(s.id, u.total);
+      if (me) store.markSeen(me.id, "logistics", s.id);
+    }
+    setArrived(frozen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [me]);
 
   // Section status is derived from unresolved decisions, not hard-coded.
   const openBySection = useMemo(() => {
@@ -111,11 +132,18 @@ export default function Travel() {
             >
               <div className="flex flex-wrap items-center gap-3 border-b border-ink-800/70 px-5 py-3.5">
                 <h2 className="font-bold text-slate-100">{s.title}</h2>
-                {open > 0 && (
-                  <span className="ml-auto rounded-full border border-aspen-500/50 bg-aspen-500/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-aspen-400">
-                    {open} open
-                  </span>
-                )}
+                <span className="ml-auto flex items-center gap-2">
+                  {arrived.get(s.id) ? (
+                    <span className="rounded-full bg-aspen-500/25 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-aspen-300">
+                      {arrived.get(s.id)} new
+                    </span>
+                  ) : null}
+                  {open > 0 && (
+                    <span className="rounded-full border border-aspen-500/50 bg-aspen-500/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-aspen-400">
+                      {open} open
+                    </span>
+                  )}
+                </span>
               </div>
 
               <div className="space-y-3 px-5 py-4">

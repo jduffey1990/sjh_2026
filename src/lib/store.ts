@@ -12,6 +12,7 @@ import {
   type Decision,
   type Comment,
   type LogisticsField,
+  type SeenMarker,
   type Scope,
 } from "./types";
 
@@ -39,6 +40,7 @@ const CONFLICT_TARGET: Record<Table, string> = {
   decisions: "id",
   comments: "id",
   logistics_fields: "id",
+  seen_markers: "rider_id,scope,scope_id",
 };
 
 const TABLE_TO_FIELD: Record<Table, keyof Snapshot> = {
@@ -49,6 +51,7 @@ const TABLE_TO_FIELD: Record<Table, keyof Snapshot> = {
   decisions: "decisions",
   comments: "comments",
   logistics_fields: "logisticsFields",
+  seen_markers: "seenMarkers",
 };
 
 /**
@@ -144,6 +147,7 @@ class Store {
         decisions,
         comments,
         logisticsFields,
+        seenMarkers,
       ] = await Promise.all([
         supabase.from("riders").select("*").order("sort_order"),
         supabase.from("group_items").select("*").order("name"),
@@ -152,6 +156,7 @@ class Store {
         supabase.from("decisions").select("*").order("sort_order"),
         supabase.from("comments").select("*").order("created_at"),
         supabase.from("logistics_fields").select("*").order("sort_order"),
+        supabase.from("seen_markers").select("*"),
       ]);
       const err =
         riders.error ||
@@ -160,7 +165,8 @@ class Store {
         personalItems.error ||
         decisions.error ||
         comments.error ||
-        logisticsFields.error;
+        logisticsFields.error ||
+        seenMarkers.error;
       if (err) throw err;
 
       this.setSnap({
@@ -171,6 +177,7 @@ class Store {
         decisions: (decisions.data ?? []) as Decision[],
         comments: (comments.data ?? []) as Comment[],
         logisticsFields: (logisticsFields.data ?? []) as LogisticsField[],
+        seenMarkers: (seenMarkers.data ?? []) as SeenMarker[],
       });
       this.setStatus("ready");
     } catch {
@@ -489,6 +496,22 @@ class Store {
       value,
       updated_by: by,
       updated_at: new Date().toISOString(),
+    });
+  }
+
+  // ---- read state ---------------------------------------------------
+
+  /** Record that a rider has now looked at a day or logistics section. */
+  markSeen(riderId: string, scope: "day" | "logistics", scopeId: string) {
+    const existing = this.snap.seenMarkers.find(
+      (m) => m.rider_id === riderId && m.scope === scope && m.scope_id === scopeId,
+    );
+    this.write<"seenMarkers">("seen_markers", {
+      id: existing?.id ?? crypto.randomUUID(),
+      rider_id: riderId,
+      scope,
+      scope_id: scopeId,
+      seen_at: new Date().toISOString(),
     });
   }
 

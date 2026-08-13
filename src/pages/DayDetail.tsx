@@ -1,8 +1,11 @@
 import { Link, useParams } from "react-router-dom";
 import { DAYS } from "../data/trip";
+import { useEffect, useRef, useState } from "react";
 import Decisions from "../components/Decisions";
 import Comments from "../components/Comments";
+import NewSince from "../components/NewSince";
 import { hasBackend } from "../lib/supabase";
+import { useDbRider, useUnreadFor, store } from "../lib/useStore";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -10,6 +13,24 @@ export default function DayDetail() {
   const { id } = useParams();
   const idx = DAYS.findIndex((d) => d.id === id);
   const d = DAYS[idx];
+  const me = useDbRider();
+  const unread = useUnreadFor("day", id ?? "");
+
+  // Snapshot what was unread on arrival BEFORE clearing it, so the page can
+  // still show "3 new since you last looked" while the badge goes away.
+  const [arrived, setArrived] = useState<number | null>(null);
+  const marked = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!me || !id) return;
+    if (marked.current === id) return;
+    marked.current = id;
+    setArrived(unread?.total ?? 0);
+    store.markSeen(me.id, "day", id);
+    // `unread` is deliberately not a dependency: we want its value at the
+    // moment of arrival, not after marking it seen resets it to zero.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [me, id]);
 
   if (!d) {
     return (
@@ -150,6 +171,8 @@ export default function DayDetail() {
 
       {hasBackend && (
         <>
+          <NewSince count={arrived} />
+
           <div className="mt-8">
             <Decisions scope="day" scopeId={d.id} />
           </div>

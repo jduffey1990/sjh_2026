@@ -92,6 +92,14 @@ export interface LogisticsField {
   updated_at: string;
 }
 
+export interface SeenMarker {
+  id: string;
+  rider_id: string;
+  scope: "day" | "logistics";
+  scope_id: string;
+  seen_at: string;
+}
+
 export interface Snapshot {
   riders: DbRider[];
   groupItems: GroupItem[];
@@ -100,6 +108,7 @@ export interface Snapshot {
   decisions: Decision[];
   comments: Comment[];
   logisticsFields: LogisticsField[];
+  seenMarkers: SeenMarker[];
 }
 
 export const EMPTY: Snapshot = {
@@ -110,6 +119,7 @@ export const EMPTY: Snapshot = {
   decisions: [],
   comments: [],
   logisticsFields: [],
+  seenMarkers: [],
 };
 
 export type SyncStatus =
@@ -125,7 +135,8 @@ export interface OutboxEntry {
     | "personal_items"
     | "decisions"
     | "comments"
-    | "logistics_fields";
+    | "logistics_fields"
+    | "seen_markers";
   op: "upsert" | "delete";
   payload: Record<string, unknown>;
   ts: number;

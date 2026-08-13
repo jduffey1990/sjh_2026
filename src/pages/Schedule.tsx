@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { DAYS, TOTALS, TRIP, type TripDay } from "../data/trip";
-import { useSnapshot } from "../lib/useStore";
+import { useSnapshot, useUnread } from "../lib/useStore";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -32,6 +32,7 @@ function Stat({
 
 function DayCard({ d }: { d: TripDay }) {
   const snap = useSnapshot();
+  const unread = useUnread().get(`day::${d.id}`) ?? null;
   const open = snap.decisions.filter(
     (x) => x.scope === "day" && x.scope_id === d.id && x.status === "open",
   ).length;
@@ -99,6 +100,25 @@ function DayCard({ d }: { d: TripDay }) {
           <Stat value={`${d.highPointFt.toLocaleString()}′`} label="high pt" />
         )}
       </div>
+
+      {unread && unread.total > 0 && (
+        <div className="border-t border-aspen-500/30 bg-aspen-500/10 px-4 py-2.5">
+          <span className="text-[11px] font-semibold leading-snug text-aspen-300">
+            ● {unread.total} new
+          </span>
+          <span className="text-[11px] text-slate-400">
+            {" — "}
+            {[
+              unread.comments &&
+                `${unread.comments} comment${unread.comments === 1 ? "" : "s"}`,
+              unread.raised && `${unread.raised} raised`,
+              unread.resolved && `${unread.resolved} resolved`,
+            ]
+              .filter(Boolean)
+              .join(", ")}
+          </span>
+        </div>
+      )}
 
       {(d.flags.length > 0 || open > 0) && (
         <div className="space-y-1 border-t border-ink-800/70 bg-ink-950/40 px-4 py-2.5">
