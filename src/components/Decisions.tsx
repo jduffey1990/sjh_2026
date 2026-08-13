@@ -13,6 +13,9 @@ function DecisionCard({ d }: { d: Decision }) {
   const resolver = d.resolved_by
     ? snap.riders.find((r) => r.id === d.resolved_by)
     : null;
+  const raiser = d.created_by
+    ? snap.riders.find((r) => r.id === d.created_by)
+    : null;
   const replies = snap.comments.filter(
     (c) => c.scope === "decision" && c.scope_id === d.id,
   ).length;
@@ -65,6 +68,17 @@ function DecisionCard({ d }: { d: Decision }) {
             </p>
           )}
 
+          {raiser && (
+            <p className="flex items-center gap-1.5 text-[11px] text-slate-600">
+              <Avatar
+                initials={raiser.initials}
+                color={raiser.color}
+                size="sm"
+              />
+              raised by {raiser.name.split(" ")[0]}
+            </p>
+          )}
+
           {resolved ? (
             <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
               {resolver && (
@@ -86,7 +100,8 @@ function DecisionCard({ d }: { d: Decision }) {
               )}
               <button
                 onClick={() => store.reopenDecision(d.id)}
-                className="ml-auto underline hover:text-slate-300"
+                disabled={!me}
+                className="ml-auto underline hover:text-slate-300 disabled:no-underline disabled:opacity-40"
               >
                 reopen
               </button>
@@ -97,7 +112,8 @@ function DecisionCard({ d }: { d: Decision }) {
                 e.preventDefault();
                 const text = outcome.trim();
                 if (!text) return;
-                store.resolveDecision(d.id, text, me?.id ?? null);
+                if (!me) return;
+                store.resolveDecision(d.id, text, me.id);
                 setOutcome("");
               }}
               className="flex gap-2"
@@ -105,13 +121,17 @@ function DecisionCard({ d }: { d: Decision }) {
               <input
                 value={outcome}
                 onChange={(e) => setOutcome(e.target.value)}
-                placeholder="What did we decide?"
+                disabled={!me}
+                placeholder={
+                  me ? "What did we decide?" : "Pick your name to resolve this"
+                }
                 className="min-w-0 flex-1 rounded-lg border border-ink-800 bg-ink-950 px-3 py-2 text-[13px] text-slate-200 placeholder:text-slate-700 focus:border-ink-600 focus:outline-none"
               />
               <button
                 type="submit"
-                disabled={!outcome.trim()}
+                disabled={!me || !outcome.trim()}
                 className="shrink-0 rounded-lg bg-sage-500/90 px-3 text-[13px] font-bold text-ink-950 disabled:opacity-30"
+                title={me ? undefined : "Pick your name first"}
               >
                 Resolve
               </button>
@@ -140,6 +160,7 @@ export default function Decisions({
   scopeId: string;
 }) {
   const snap = useSnapshot();
+  const me = useDbRider();
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
 
@@ -179,8 +200,8 @@ export default function Decisions({
           onSubmit={(e) => {
             e.preventDefault();
             const t = title.trim();
-            if (!t) return;
-            store.addDecision(scope, scopeId, t);
+            if (!t || !me) return;
+            store.addDecision(scope, scopeId, t, me.id);
             setTitle("");
             setAdding(false);
           }}
@@ -195,7 +216,8 @@ export default function Decisions({
           />
           <button
             type="submit"
-            className="shrink-0 rounded-lg bg-aspen-500 px-3 text-[13px] font-bold text-ink-950"
+            disabled={!me || !title.trim()}
+            className="shrink-0 rounded-lg bg-aspen-500 px-3 text-[13px] font-bold text-ink-950 disabled:opacity-30"
           >
             Add
           </button>

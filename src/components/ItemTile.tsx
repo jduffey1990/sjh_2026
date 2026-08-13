@@ -222,7 +222,8 @@ export default function ItemTile({
           <Stepper
             label="group brings"
             value={item.qty}
-            onChange={(n) => store.setItemQty(item.id, n, me?.id ?? null)}
+            disabled={!me}
+            onChange={(n) => me && store.setItemQty(item.id, n, me.id)}
           />
 
           {me ? (

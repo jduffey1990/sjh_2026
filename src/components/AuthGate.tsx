@@ -1,33 +1,33 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
-import { useAuth } from '../lib/useAuth'
-import { signIn } from '../lib/supabase'
+import { useState, type FormEvent, type ReactNode } from "react";
+import { useAuth } from "../lib/useAuth";
+import { signIn } from "../lib/supabase";
 
 export default function AuthGate({ children }: { children: ReactNode }) {
-  const state = useAuth()
-  const [pw, setPw] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [err, setErr] = useState<string | null>(null)
+  const state = useAuth();
+  const [pw, setPw] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
   // No backend configured: the static pages still work, so never block them.
-  if (state === 'no-backend' || state === 'in') return <>{children}</>
+  if (state === "no-backend" || state === "in") return <>{children}</>;
 
-  if (state === 'checking') {
+  if (state === "checking") {
     return (
       <div className="grid min-h-dvh place-items-center text-sm text-slate-600">
         …
       </div>
-    )
+    );
   }
 
   async function submit(e: FormEvent) {
-    e.preventDefault()
-    setBusy(true)
-    setErr(null)
+    e.preventDefault();
+    setBusy(true);
+    setErr(null);
     try {
-      await signIn(pw)
+      await signIn(pw);
     } catch {
-      setErr('Not the right password.')
-      setBusy(false)
+      setErr("Not the right password.");
+      setBusy(false);
     }
   }
 
@@ -41,9 +41,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
             </span>
             <div>
               <h1 className="font-bold text-slate-100">Telluride → Moab</h1>
-              <p className="text-[11px] text-slate-500">
-                Sep 26 – Oct 2, 2026
-              </p>
+              <p className="text-[11px] text-slate-500">Sep 26 – Oct 2, 2026</p>
             </div>
           </div>
 
@@ -69,7 +67,7 @@ export default function AuthGate({ children }: { children: ReactNode }) {
               disabled={busy || !pw}
               className="tap-target mt-4 w-full rounded-lg bg-aspen-500 py-2.5 font-bold text-ink-950 disabled:opacity-40"
             >
-              {busy ? 'Checking…' : 'Let me in'}
+              {busy ? "Checking…" : "Let me in"}
             </button>
           </form>
         </div>
@@ -80,5 +78,5 @@ export default function AuthGate({ children }: { children: ReactNode }) {
         </p>
       </div>
     </div>
-  )
+  );
 }

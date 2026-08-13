@@ -1,7 +1,7 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 /**
  * The single shared trip account. Everyone signs in as this; who you *are*
@@ -9,7 +9,7 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
  *
  * The address is a local-only placeholder -- no mail is ever sent to it.
  */
-export const TRIP_EMAIL = 'trip@sjh2026.local'
+export const TRIP_EMAIL = "trip@sjh2026.local";
 
 /**
  * Null when the env vars are absent, which is a supported state: the
@@ -24,23 +24,23 @@ export const supabase: SupabaseClient | null =
           // so it is persisted and refreshed rather than held in memory.
           persistSession: true,
           autoRefreshToken: true,
-          storageKey: 'sjh2026.auth',
+          storageKey: "sjh2026.auth",
         },
         realtime: { params: { eventsPerSecond: 5 } },
       })
-    : null
+    : null;
 
-export const hasBackend = supabase !== null
+export const hasBackend = supabase !== null;
 
 export async function signIn(password: string) {
-  if (!supabase) throw new Error('No backend configured')
+  if (!supabase) throw new Error("No backend configured");
   const { error } = await supabase.auth.signInWithPassword({
     email: TRIP_EMAIL,
     password,
-  })
-  if (error) throw error
+  });
+  if (error) throw error;
 }
 
 export async function signOut() {
-  await supabase?.auth.signOut()
+  await supabase?.auth.signOut();
 }

@@ -280,7 +280,7 @@ function AddItem({
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!name.trim()) return;
+        if (!name.trim() || !meId) return;
         store.addItem(
           {
             name: name.trim(),
@@ -339,7 +339,8 @@ function AddItem({
       <div className="flex gap-2 sm:col-span-4">
         <button
           type="submit"
-          className="rounded-lg bg-aspen-500 px-4 py-2 text-sm font-bold text-ink-950"
+          disabled={!meId}
+          className="rounded-lg bg-aspen-500 px-4 py-2 text-sm font-bold text-ink-950 disabled:opacity-30"
         >
           Add to board
         </button>

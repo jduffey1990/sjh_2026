@@ -64,6 +64,9 @@ export interface Decision {
   outcome: string | null;
   resolved_by: string | null;
   resolved_at: string | null;
+  /** Who raised it. Null on seeded decisions -- those came from the route
+      research, not from a person. */
+  created_by: string | null;
   sort_order: number;
   created_at: string;
   updated_at: string;

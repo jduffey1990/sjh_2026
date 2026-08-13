@@ -65,7 +65,10 @@ export const LOGISTICS: LogisticsSection[] = [
     ],
     items: [
       { label: "Moab lodging (Fri Oct 2)", value: "TBD" },
-      { label: "Shuttle service (Sat Oct 3)", value: "TBD — already booked by someone" },
+      {
+        label: "Shuttle service (Sat Oct 3)",
+        value: "TBD — already booked by someone",
+      },
       { label: "Then", value: "Drive home" },
     ],
   },

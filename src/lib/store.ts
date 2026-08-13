@@ -432,6 +432,7 @@ class Store {
     scope: "day" | "logistics",
     scopeId: string,
     title: string,
+    by: string | null,
     detail?: string,
   ) {
     const now = new Date().toISOString();
@@ -445,6 +446,7 @@ class Store {
       outcome: null,
       resolved_by: null,
       resolved_at: null,
+      created_by: by,
       sort_order: 100,
       created_at: now,
       updated_at: now,

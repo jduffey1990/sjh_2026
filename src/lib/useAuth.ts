@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { supabase, hasBackend } from './supabase'
+import { useEffect, useState } from "react";
+import { supabase, hasBackend } from "./supabase";
 
-export type AuthState = 'checking' | 'in' | 'out' | 'no-backend'
+export type AuthState = "checking" | "in" | "out" | "no-backend";
 
 /**
  * Session state for the shared trip account.
@@ -13,22 +13,22 @@ export type AuthState = 'checking' | 'in' | 'out' | 'no-backend'
  */
 export function useAuth() {
   const [state, setState] = useState<AuthState>(
-    hasBackend ? 'checking' : 'no-backend',
-  )
+    hasBackend ? "checking" : "no-backend",
+  );
 
   useEffect(() => {
-    if (!supabase) return
+    if (!supabase) return;
 
     supabase.auth
       .getSession()
-      .then(({ data }) => setState(data.session ? 'in' : 'out'))
-      .catch(() => setState('out'))
+      .then(({ data }) => setState(data.session ? "in" : "out"))
+      .catch(() => setState("out"));
 
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
-      setState(session ? 'in' : 'out'),
-    )
-    return () => sub.subscription.unsubscribe()
-  }, [])
+      setState(session ? "in" : "out"),
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
-  return state
+  return state;
 }

@@ -25,11 +25,14 @@ function Field({ f }: { f: LogisticsField }) {
       <dd>
         <input
           defaultValue={f.value ?? ""}
-          placeholder="—"
+          placeholder={me ? "—" : "pick your name to edit"}
+          disabled={!me}
           onBlur={(e) => {
             const v = e.target.value.trim();
-            if (v !== (f.value ?? "")) {
-              store.setLogisticsField(f.id, v, me?.id ?? null);
+            // Never write an unattributed edit -- `me` is briefly null while
+            // the roster loads, and a value with no author is worse than none.
+            if (me && v !== (f.value ?? "")) {
+              store.setLogisticsField(f.id, v, me.id);
             }
           }}
           className={[
