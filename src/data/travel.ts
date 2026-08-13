@@ -88,6 +88,20 @@ export const LOGISTICS: LogisticsSection[] = [
     ],
   },
   {
+    id: "gpx-tracks",
+    title: "GPS tracks & navigation",
+    status: "open",
+    body: [
+      "San Juan Huts sends GPX tracks, daily route descriptions and elevation profiles in the Route Packet when the reservation is made. None of it is published publicly — the packet is essentially the product they sell.",
+      "However the tracks get distributed, they need to be loaded onto a device before anyone leaves Telluride. There is no signal to download anything between there and the Gateway store on day 5.",
+    ],
+    items: [
+      { label: "Source", value: "Route Packet email from San Juan Huts" },
+      { label: "Who has the packet", value: "TBD" },
+      { label: "Sent to the group", value: "TBD" },
+    ],
+  },
+  {
     id: "connectivity",
     title: "Power & signal",
     status: "info",
