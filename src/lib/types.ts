@@ -79,6 +79,8 @@ export interface OutboxEntry {
   op: 'upsert' | 'delete'
   payload: Record<string, unknown>
   ts: number
+  /** Failed sync attempts; the entry is dropped once this hits the cap. */
+  attempts?: number
 }
 
 export const TILE_STATES = [

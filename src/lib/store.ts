@@ -16,6 +16,24 @@ const OUTBOX_KEY = 'sjh2026.outbox'
 
 type Table = OutboxEntry['table']
 
+/** Give up on a single row after this many failed sync attempts. */
+const MAX_ATTEMPTS = 5
+
+/**
+ * Upsert conflict targets.
+ *
+ * `claims` has a unique (group_item_id, rider_id) constraint, so an offline
+ * claim carrying a locally-generated id can collide with one the same rider
+ * already made on another device. Resolving on the natural key merges the
+ * two instead of failing; without this the queue jams on a 409.
+ */
+const CONFLICT_TARGET: Record<Table, string> = {
+  riders: 'id',
+  group_items: 'id',
+  claims: 'group_item_id,rider_id',
+  personal_items: 'id',
+}
+
 const TABLE_TO_FIELD: Record<Table, keyof Snapshot> = {
   riders: 'riders',
   group_items: 'groupItems',
@@ -162,9 +180,20 @@ class Store {
         const q =
           e.op === 'delete'
             ? supabase.from(e.table).delete().eq('id', e.payload.id as string)
-            : supabase.from(e.table).upsert(e.payload)
+            : supabase
+                .from(e.table)
+                .upsert(e.payload, { onConflict: CONFLICT_TARGET[e.table] })
         const { error } = await q
-        if (error) throw error
+
+        if (error) {
+          // A row the server will never accept must not wedge the queue --
+          // everything behind it would stop syncing forever. Retry a few
+          // times to ride out transient failures, then drop it and move on.
+          e.attempts = (e.attempts ?? 0) + 1
+          if (e.attempts < MAX_ATTEMPTS) throw error
+          console.warn('[sjh] dropping unsyncable change', e.table, error)
+        }
+
         this.outbox.shift()
         await set(OUTBOX_KEY, this.outbox)
         this.emit()
@@ -172,6 +201,7 @@ class Store {
       this.setStatus('ready')
     } catch {
       // Keep the queue; it replays on the next online event.
+      await set(OUTBOX_KEY, this.outbox)
       this.setStatus('offline')
     } finally {
       this.flushing = false
