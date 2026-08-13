@@ -1,8 +1,13 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import SyncBadge from "../components/SyncBadge";
 import RiderPicker from "../components/RiderPicker";
 import { useDbRider, useSnapshot, store } from "../lib/useStore";
 import { hasBackend } from "../lib/supabase";
+
+function fmtOz(oz: number) {
+  return oz >= 16 ? `${(oz / 16).toFixed(1)} lb` : `${oz.toFixed(1)} oz`;
+}
 
 export default function MyKit() {
   const snap = useSnapshot();
@@ -10,7 +15,7 @@ export default function MyKit() {
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
 
-  const { byCategory, packed, total } = useMemo(() => {
+  const { byCategory, packed, total, groupGear, groupOz } = useMemo(() => {
     const mine = snap.personalItems
       .filter((p) => p.rider_id === me?.id)
       .sort((a, b) => a.sort_order - b.sort_order);
@@ -20,12 +25,33 @@ export default function MyKit() {
       if (list) list.push(p);
       else map.set(p.category, [p]);
     }
+
+    // Group gear you claimed on the board belongs in your bag too, so it
+    // belongs on your packing list. `claims.packed` is the same field the
+    // board's "In my bag" toggles -- one source of truth, two views.
+    const items = new Map(snap.groupItems.map((i) => [i.id, i]));
+    const gear = snap.claims
+      .filter((c) => c.rider_id === me?.id)
+      .map((c) => ({ claim: c, item: items.get(c.group_item_id) }))
+      .filter(
+        (g): g is { claim: typeof g.claim; item: NonNullable<typeof g.item> } =>
+          Boolean(g.item),
+      )
+      .sort((a, b) => a.item.name.localeCompare(b.item.name));
+
     return {
       byCategory: [...map.entries()],
-      packed: mine.filter((p) => p.packed).length,
-      total: mine.length,
+      packed:
+        mine.filter((p) => p.packed).length +
+        gear.filter((g) => g.claim.packed).length,
+      total: mine.length + gear.length,
+      groupGear: gear,
+      groupOz: gear.reduce(
+        (n, g) => n + Number(g.item.weight_oz) * g.claim.qty,
+        0,
+      ),
     };
-  }, [snap.personalItems, me]);
+  }, [snap.personalItems, snap.claims, snap.groupItems, me]);
 
   if (!hasBackend) {
     return (
@@ -58,7 +84,8 @@ export default function MyKit() {
           {me.name.split(" ")[0]}'s kit
         </h1>
         <p className="mt-1 text-sm text-slate-400">
-          Your own gear. None of this counts toward the group load balance.
+          Everything going in your bag — your own kit, plus the group gear you
+          claimed on the board.
         </p>
 
         <div className="mt-4 flex items-center gap-3">
@@ -85,6 +112,73 @@ export default function MyKit() {
         San Juan Huts advertises. Swap it for the Bible's own clothing list when
         the Route Packet arrives.
       </div>
+
+      <section>
+        <div className="mb-2 flex items-baseline gap-2">
+          <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            Group gear you're carrying
+          </h2>
+          {groupGear.length > 0 && (
+            <span className="text-[11px] text-slate-600">
+              {fmtOz(groupOz)} total
+            </span>
+          )}
+          <Link
+            to="/board"
+            className="ml-auto text-[11px] text-slate-500 underline hover:text-slate-300"
+          >
+            board
+          </Link>
+        </div>
+
+        {groupGear.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-ink-800 p-3 text-center text-[12px] text-slate-600">
+            You haven't claimed any group gear yet —{" "}
+            <Link to="/board" className="text-aspen-500 underline">
+              take something off the board
+            </Link>
+            .
+          </p>
+        ) : (
+          <ul className="divide-y divide-ink-800/70 overflow-hidden rounded-xl border border-aspen-500/30">
+            {groupGear.map(({ claim, item }) => (
+              <li key={claim.id}>
+                <label className="flex cursor-pointer items-center gap-3 bg-aspen-500/[0.05] px-3.5 py-3 hover:bg-aspen-500/[0.09]">
+                  <input
+                    type="checkbox"
+                    checked={claim.packed}
+                    onChange={() => store.togglePacked(item.id, claim.rider_id)}
+                    className="size-5 shrink-0 accent-sage-500"
+                  />
+                  <span
+                    className={[
+                      "flex-1 text-sm",
+                      claim.packed
+                        ? "text-slate-500 line-through"
+                        : "text-slate-200",
+                    ].join(" ")}
+                  >
+                    {item.name}
+                    {claim.qty > 1 && (
+                      <span className="ml-1.5 text-[11px] tabular-nums text-aspen-500">
+                        ×{claim.qty}
+                      </span>
+                    )}
+                    {item.qty === 0 && (
+                      <span className="ml-1.5 text-[10px] uppercase tracking-wider text-slate-600">
+                        not required
+                      </span>
+                    )}
+                  </span>
+                  <span className="shrink-0 text-[11px] tabular-nums text-slate-600">
+                    {fmtOz(Number(item.weight_oz) * claim.qty)}
+                  </span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {byCategory.map(([cat, items]) => (
         <section key={cat}>
