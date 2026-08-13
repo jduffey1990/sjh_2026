@@ -71,11 +71,17 @@ npm run dev                  # http://localhost:5173/sjh_2026/
    ./supabase/psql.sh -f supabase/schema.sql
    ./supabase/psql.sh -f supabase/seed.sql
    ./supabase/psql.sh -f supabase/002_planning.sql
-   ./supabase/psql.sh -v pw=your-trip-password -f supabase/003_auth.sql
+   ./supabase/set-password.sh
    ```
 
-   It works for one-off queries too:
-   `./supabase/psql.sh -c 'select count(*) from claims'`
+   `psql.sh` also takes any psql arguments, for one-off queries:
+
+   ```bash
+   ./supabase/psql.sh -c 'select count(*) from claims'
+   ./supabase/psql.sh
+   ```
+
+   (that last one opens an interactive shell; leave it with `\q`)
 
 Note Vite only reads `VITE_`-prefixed variables — `NEXT_PUBLIC_*` names are
 silently ignored, and the app will behave as though there is no backend.
@@ -94,14 +100,16 @@ returns `[]` from every table. The gate is enforced by Postgres.
 Sign-in persists and auto-refreshes, so you do it once. **Do it before you
 leave** — there's no signal to sign in with between Telluride and Gateway.
 
-To rotate the password:
+To set or rotate the password:
 
 ```bash
-./supabase/psql.sh -v pw=new-password -f supabase/003_auth.sql
+./supabase/set-password.sh
 ```
 
-psql quotes and escapes the value itself, so pass it plain — apostrophes and
-all. The password is never committed to this repo; it is passed in at run time.
+It prompts without echoing, so the password never reaches your screen, your
+shell history, or the terminal scrollback — and it is never committed to this
+repo. Rotating does **not** sign out devices that are already in; it only
+changes what a new sign-in requires.
 
 ⚠️ Still don't put anything sensitive in the database. One shared password among
 eight people is not access control in any serious sense — the Riders page holds

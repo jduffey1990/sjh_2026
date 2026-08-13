@@ -31,7 +31,9 @@
 -- :'pw' (rather than bare :pw) makes psql quote and escape the value into a
 -- SQL literal itself, so the caller passes a plain password and one
 -- containing an apostrophe can neither break the script nor inject SQL.
-select set_config('sjh.pw', :'pw', false);
+-- \g /dev/null discards the result row. Without it psql helpfully prints the
+-- password straight to the terminal, where it lands in the scrollback.
+select set_config('sjh.pw', :'pw', false) \g /dev/null
 
 -- ---------------------------------------------------------------------
 -- The shared account. Upsert so re-running rotates the password rather
@@ -91,6 +93,9 @@ end $$;
 do $$
 declare t text;
 begin
+  -- "policy does not exist, skipping" for seven tables is pure noise.
+  perform set_config('client_min_messages', 'warning', true);
+
   foreach t in array array[
     'riders', 'group_items', 'claims', 'personal_items',
     'decisions', 'comments', 'logistics_fields'
