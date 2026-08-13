@@ -56,6 +56,20 @@ export const LOGISTICS: LogisticsSection[] = [
     ],
   },
   {
+    id: "getting-home",
+    title: "Fri Oct 2 – Sat Oct 3 — getting home",
+    status: "open",
+    body: [
+      "The ride finishes in Moab on Friday, so Friday night is a bed, a shower and a meal that did not come out of a hut cabinet.",
+      "Saturday is the shuttle back to wherever the vehicles were left, and then the drive home. Someone in the group has already sorted the shuttle — whoever that was, resolve the decision below with the operator, time and cost so it is in one place instead of one person's inbox.",
+    ],
+    items: [
+      { label: "Moab lodging (Fri Oct 2)", value: "TBD" },
+      { label: "Shuttle service (Sat Oct 3)", value: "TBD — already booked by someone" },
+      { label: "Then", value: "Drive home" },
+    ],
+  },
+  {
     id: "huts",
     title: "What the huts provide",
     status: "info",

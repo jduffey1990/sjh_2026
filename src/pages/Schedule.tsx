@@ -57,7 +57,7 @@ function DayCard({ d }: { d: TripDay }) {
               : "bg-gradient-to-br from-rock-500 to-aspen-500 text-ink-950",
           ].join(" ")}
         >
-          {isTravel ? "→" : d.day}
+          {isTravel ? (d.id === "return" ? "⌂" : "→") : d.day}
         </div>
 
         <div className="min-w-0 flex-1">

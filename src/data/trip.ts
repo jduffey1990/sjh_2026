@@ -274,6 +274,30 @@ export const DAYS: TripDay[] = [
     flags: [],
     profile: "TM-DAY-7-Graph.webp",
   },
+  {
+    id: "return",
+    day: null,
+    kind: "travel",
+    date: "2026-10-03",
+    dateLabel: "Oct 3",
+    weekday: "Saturday",
+    title: "Shuttle back & drive home",
+    from: "Moab, UT",
+    to: "Home",
+    miles: null,
+    gainFt: null,
+    highPointFt: null,
+    summary:
+      "Last night in Moab after finishing, then the shuttle back to the vehicles and the drive home.",
+    detail: [
+      "Friday night is in Moab — the ride finishes there, so somewhere to sleep and a proper meal after seven days of hut food.",
+      "Saturday is the shuttle back to wherever the cars were left, then everyone scatters. Worth knowing the pickup time the night before rather than discovering it over breakfast.",
+      "Whoever booked the shuttle: fill in the operator, time and cost on the Travel page so the group has it in one place.",
+    ],
+    alternates: [],
+    flags: [],
+    profile: null,
+  },
 ];
 
 export const RIDERS = [
